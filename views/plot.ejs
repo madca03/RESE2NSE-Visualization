@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html class="no-js" lang="en">
+  <head>
+	<% include ./partials/head %>
+    <link rel="stylesheet" href="/stylesheets/jquery-ui.min.css" />
+    <link rel="stylesheet" href="/stylesheets/plot.css" />
+	
+  </head>
+  
+  <body>
+    <header>
+		<% include ./partials/header %>
+    </header> <!-- end header -->
+	<% include ./partials/nav %>
+	
+    <div class="main">
+      <div class="row">
+	          <div class="small-3 columns">
+          <div class="nav-side">
+            <div class="floor-links">
+              <ul>
+                <li><span class="nav-side-heading">SHOW LAST</span><li>
+				<% if (resolution == "1 hr") {%>
+                  <li><a type = "button" class = "expanded success blocked button zoom-options-button" a href="/plot" disabled >1 hour</a></li>
+				<% } else { %>
+                  <li><a type = "button" class = "expanded success blocked button zoom-options-button" a href="/plot">1 hour</a></li>
+				<% } %>
+				<% if (resolution == "3 hrs") {%>
+				  <li><a type = "button" class = "expanded success blocked button zoom-options-button" a href="/plot/3hrs"  disabled >3 hours</a></li>
+				<% } else { %>
+				  <li><a type = "button" class = "expanded success blocked button zoom-options-button" a href="/plot/3hrs">3 hours</a></li>
+				<% } %>
+				<% if (resolution == "6 hrs") {%>
+				  <li><a type = "button" class = "expanded success blocked button zoom-options-button" a href="/plot/6hrs" disabled >6 hours</a></li>
+				<% } else { %>
+				  <li><a type = "button" class = "expanded success blocked button zoom-options-button" a href="/plot/6hrs">6 hours</a></li>
+				<% } %>
+				<% if (resolution == "12 hrs") {%>
+				  <li><a type = "button" class = "expanded success blocked button zoom-options-button" a href="/plot/12hrs" disabled >12 hours</a></li>
+				<% } else { %>
+				  <li><a type = "button" class = "expanded success blocked button zoom-options-button" a href="/plot/12hrs">12 hours</a></li>
+				<% } %>
+				<% if (resolution == "1 day") {%>
+				  <li><a type = "button" class = "expanded success blocked button zoom-options-button" a href="/plot/1day" disabled >1 day</a></li>
+				<% } else { %>
+				  <li><a type = "button" class = "expanded success blocked button zoom-options-button" a href="/plot/1day">1 day</a></li>
+				<% } %>
+
+              </ul>
+            </div> <!-- end .floor-links -->
+          </div> <!-- end .nav-side -->
+        </div> <!-- end .columns -->
+
+        <div class="small-9 columns" id = "main-window">
+	  
+     </div> <!-- end .columns -->
+      </div> <!-- end .row -->
+    </div> <!-- end .main -->
+
+   <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+<script language="javascript" type="text/javascript" src="/javascripts/jquery.min.js"></script>
+<script language="javascript" type="text/javascript" src="/javascripts/jquery.flot.min.js"></script>
+<script language="javascript" type="text/javascript" src="/javascripts/jquery.flot.time.min.js"></script>
+<script language="javascript" type="text/javascript" src="/javascripts/date.js"></script>
+
+<script type="text/javascript">
+
+STD_TICK_SIZE = 6;
+DEFAULT_RESOLUTION = "<%=resolution%>";
+RESOLUTIONS = ["1 hr", "3 hrs", "6 hrs", "12 hrs", "1 day"];
+SECONDS = [3600000, 10800000, 21600000, 43200000, 86400000];
+TIMEFORMATS = ["%H:%M:%S", "%H:%M", "%H:%M", "%H:%M", "%H:%M"];
+// actual number of ticks would be RES_TO_SECONDS[ticks] / standard tick size
+
+DEFAULT_MIN = 200;
+DEFAULT_MAX = 900;
+LOWEST_MIN = 0;
+HIGHEST_MAX = 1000;
+
+UPDATE_INTERVAL = 30; // in ms
+UPDATE_INTERVAL_NO = 2000; // updated interval in ms when no additional data is found
+MAX_DATA_LENGTH = 4000000; // number of rows queried at a time
+BASE_URL = "/get_sensor_data/"
+
+var windows = {};
+var resolution_map = new ResolutionMap(RESOLUTIONS, SECONDS, TIMEFORMATS);
+var event_manager = new WindowEventManager();
+
+var count = 0;
+var selected_resolution = DEFAULT_RESOLUTION;
+var url = BASE_URL + count.toString() + "/" + resolution_map.getURLShortcut(selected_resolution);
+
+function ResolutionMapElement(seconds, timeformat) {
+  this.seconds = seconds;
+  this.timeformat = timeformat;
+}
+
+function ResolutionMap(resolutions, seconds, timeformats) {
+  this.elements = {};
+
+  if (resolutions.length == seconds.length && seconds.length == timeformats.length) {
+    var i;
+    for (i = 0; i < resolutions.length; i++) {
+      this.elements[resolutions[i]] = new ResolutionMapElement(seconds[i], timeformats[i]);
+    }
+  }
+
+  this.resolutionExists = function(resolution) {
+    return (resolution in this.elements);
+  };
+  this.getSeconds = function(resolution) {
+    if (resolution in this.elements) {
+      return this.elements[resolution].seconds;
+    }
+    else {
+      console.log("Invalid resolution");
+      return -1;
+    }
+  };
+  this.getTimeFormat = function(resolution) {
+    if (resolution in this.elements) {
+      return this.elements[resolution].timeformat;
+    }
+    else {
+      console.log("Invalid resolution");
+      return "";
+    }
+  };
+  this.getURLShortcut = function(resolution) {
+    if (resolution in this.elements) {
+      var str = resolution;
+      str = str.replace(/\s+/g, '');
+      str = str.slice(0, 2);
+      return str;
+    }
+    else {
+      console.log("Invalid resolution");
+      return "";
+    }
+  };
+}
+
+function NodeSeries(node_name, max_data_length) {
+  this.name = node_name;
+  this.data = [];
+
+  this.max_data_length = max_data_length;
+  this.max_spread = resolution_map.getSeconds(DEFAULT_RESOLUTION);
+
+  this.visible = true;
+
+  // methods
+  this.isVisible = function() {
+    return this.visible;
+  };
+  this.makeVisible = function() {
+    this.visible = true;
+  };
+  this.makeInvisible = function() {
+    this.visible = false;
+  };
+  // adds new data to the data array
+  this.addData = function(time, data) {
+    // pushes the data into the data array
+    this.data.push([time, data]);
+
+    if (this.data.length > 0) {
+      if ((time - this.data[0][0]) > this.max_spread) {
+        this.data.shift();
+      }
+      else if (this.data.length == this.max_data_length) {
+        this.data.shift();
+      }
+    }
+  };
+  this.getDates = function() {
+    var options = {month: 'long', day: 'numeric'};
+
+    var earliest_date = new Date(0);
+    earliest_date.setUTCMilliseconds(this.data[0][0]);
+    earliest_date = earliest_date.toLocaleDateString('en-US', options);
+
+    var latest_date = new Date(0);
+    latest_date.setUTCMilliseconds(this.data[this.data.length - 1][0]);
+    latest_date = latest_date.toLocaleDateString('en-US', options);
+
+    if (earliest_date == latest_date) {
+      return [earliest_date];
+    }
+    else {
+      return [earliest_date, latest_date];
+    }
+  };
+  this.getData = function() {
+    if (this.isVisible()) {
+      return this.data;
+    }
+    else {
+      return [];
+    }
+  }
+  this.getPlotDict = function(show_legend) {
+    if (show_legend) {
+      return {
+        label: this.name,
+        data: this.getData(),
+        lines: {
+          show: true
+        }
+      };
+    }
+    else {
+      return {
+        label: null,
+        data: this.getData(),
+        lines: {
+          show: true
+        }
+      };
+    }
+  };
+  this.changeMaxSpread = function(resolution) {
+    this.max_spread = resolution_map.getSeconds(resolution);
+
+    if (this.data[this.data.length - 1][0] - this.data[0][0] > this.max_spread) {
+      var i = 0;
+
+      // alter data so it would fit within maximum spread
+      while (i < this.data.length) {
+        if (this.data[this.data.length - 1][0] - this.data[i][0] <= this.max_spread) {
+          break;
+        }
+        i++;
+      }
+
+      this.data = this.data.slice(i);
+    }
+  };
+}
+
+function TIDPlot(tid, placeholder_id, min, max, resolution, title_container) {
+  this.tid = tid;
+  this.nodes = {};
+
+  this.min = min;
+  this.max = max;
+
+  this.title_container = title_container;
+
+  this.show_legend = true;
+
+  this.resolution = resolution;
+
+  this.plot = $.plot(("#" + placeholder_id), [], {
+    label: ("TID = " + this.tid),
+		series: {
+		    shadowSize: 0,
+        lines: {
+          show: true
+        },
+        points: {
+          radius: 0.5,
+          show: true
+        }
+		},
+		yaxis: {
+			show: true,
+      min: this.min,
+			max: this.max
+		},
+		xaxis: {
+			mode: "time",
+      timeformat: resolution_map.getTimeFormat(resolution),
+      timezone: "browser"
+		}
+	});
+
+  // methods
+  this.setPlotTitle = function(dates) {
+    if (dates.length == 1) {
+      this.title_container.text(dates[0])
+    }
+    else if (dates.length == 2) {
+      this.title_container.text(dates[0] + " - " + dates[1]);
+    }
+  }
+  this.getData = function() { // gets displayable data
+    var data = [];
+    var dates = [];
+
+    for (node in this.nodes) {
+      if (this.nodes[node].isVisible()) {
+          curr_dates = this.nodes[node].getDates();
+          if (curr_dates.length > dates.length) {
+            dates = curr_dates;
+          }
+          data.push(this.nodes[node].getPlotDict(this.show_legend));
+      }
+      this.setPlotTitle(dates);
+    }
+    return data;
+  };
+  this.addNode = function(node_name) {
+    this.nodes[node_name] = new NodeSeries(node_name, MAX_DATA_LENGTH);
+  };
+  this.nodeDoesNotExist = function(node_name) {
+    return (!(node_name in this.nodes));
+  };
+  this.setNodeVisibility = function(node_name, visible) {
+    if (visible) {
+      this.nodes[node_name].makeVisible();
+    }
+    else {
+      this.nodes[node_name].makeInvisible();
+    }
+  };
+  this.addData = function(node_name, time, data) {
+    // adds new data to the data array
+    this.nodes[node_name].addData(time, data);
+  };
+  this.refreshPlot = function() {
+    this.plot.setData(this.getData());
+
+    this.plot.getAxes().yaxis.options.min = this.min;
+    this.plot.getAxes().yaxis.options.max = this.max;
+
+    this.plot.getAxes().xaxis.options.timeformat = resolution_map.getTimeFormat(this.resolution);
+    //this.plot.getAxes().xaxis.options.tickSize = [(RES_TO_SECONDS[this.resolution] / STD_TICK_SIZE), 'second'];
+
+    this.plot.setupGrid();
+    this.plot.draw();
+  };
+  this.setMin = function(new_min) {
+    if (new_min < this.max) {
+      if (new_min >= LOWEST_MIN) {
+        this.min = new_min;
+      } else {
+        this.min  = LOWEST_MIN;
+      }
+    }
+  };
+  this.setMax = function(new_max) {
+    if (new_max > this.min) {
+      if (new_max <= HIGHEST_MAX) {
+        this.max = new_max;
+      } else {
+        this.max = HIGHEST_MAX;
+      }
+    }
+  };
+  this.setLegendVisibility = function(visibility) {
+    this.show_legend = visibility;
+  };
+  this.changeResolution = function(new_resolution) {
+    if (this.resolution != new_resolution) {
+      this.resolution = new_resolution;
+      for (node in this.nodes) {
+        this.nodes[node].changeMaxSpread(new_resolution);
+      }
+    }
+    else {
+      console.log("Invalid resolution");
+    }
+  };
+}
+
+function CheckboxWindow(container, id, name, put_well) {
+  var checkbox_class = '';
+  if (put_well) {
+    checkbox_class += 'callout secondary';
+  }
+  container.append("<div class = '" + checkbox_class + "' id = '" + id + "'></div>");
+
+  this.selector = $("#" + id);
+  this.name = name;
+
+  // methods
+  this.addCheckbox = function(class_name, value) {
+    this.selector.append(
+	"<label ><input style='margin:0;' class = 'checkbox " + class_name + "' checked = 'checked' type = 'checkbox' name = '" + this.name + "' value = '" + value + "'>" + value + "</label>");
+  };
+	
+}
+
+
+function MinmaxWindow(container, min_id, min_name, min_value, max_id, max_name, max_value) {
+  container.append("<div class = 'row'>" +
+    "<div class = 'small-6 columns'>" +
+      "<div class = 'input-group'>" +
+        "<span  class='input-group-label' for = '" + min_id + "'>Set Minimum Y</span >" +
+        "<input type = 'number' class = 'min-setter form-control input-group-field' id = '" + min_id + "' name = '" + min_name + "' value = '" + min_value + "'>" +
+      "</div>" +
+    "</div>" +
+    "<div class = 'small-6 columns'>" +
+    "<div class = 'input-group'>" +
+      "<span class='input-group-label' for = '" + max_id + "'>Set Maximum Y</span>" +
+      "<input type = 'number' class = 'max-setter form-control input-group-field' id = '" + max_id + "' name = '" + max_name + "' value = '" + max_value + "'>" +
+    "</div>" +
+    "</div>" +
+  "</div>");
+}
+
+
+
+function TIDWindow(container, tid) {
+  container.append("" +
+  "<div class = 'row'>" +
+      "<div class = 'callout'>" +
+        "<div class = 'callout success text-center'>" +
+          "<h5>TID = " + tid + "</h5>" +
+        "</div>" +
+        "<div class = 'callout-body'>" +
+		
+          "<div class = 'row'>" +
+            "<div class = 'small-9 columns center-block'>" +
+              "<div class = 'plot-placeholder center-block' style = 'width:650px; height:500px;' id = 'tid-plot" + tid + "'>" +
+              "</div>" +
+              "<br />" +
+              "<p class = 'text-center' id = 'plot-title" + tid + "'>" +
+              "</p>" +
+            "</div>" +
+			
+            "<div class = 'small-3 columns'>" +
+              "<div class = 'row'>" +
+                "<div class = 'small-12 columns'>" +
+                  "<div class ='center-block checkbox-window' id = 'series-checkbox-window" + tid + "'>" +
+                  "</div>" +
+                "</div>" +
+              "</div>" +
+            "</div>" +
+			
+          "</div>" +
+		  	  
+          "<div class = 'row'>" +
+		              "<div class = 'small-2 columns'>" +
+              "<div class = 'center-block' id = 'legend-enable-window" + tid +  "' style = 'width:500px;'>" +
+              "</div>" +
+            "</div>" +
+            "<div class = 'small-10 columns'>" +
+              "<div class = 'center-block minmax-window' id = 'minmax-window" + tid + "'>" +
+              "</div>" +
+            "</div>" +
+          "</div>" +
+
+        "</div>" +
+      "</div>" +
+  "</div>");
+
+  this.series_checkbox_window = new CheckboxWindow($("#series-checkbox-window" + tid), ("checkbox-form-" + tid), tid, true);
+  this.minmax_window = new MinmaxWindow($("#minmax-window" + tid), ("min-setter" + tid), tid, DEFAULT_MIN, ("max-setter" + tid), tid, DEFAULT_MAX);
+  this.tid_plot = new TIDPlot(tid, ("tid-plot" + tid), DEFAULT_MIN, DEFAULT_MAX, DEFAULT_RESOLUTION, $("#plot-title" + tid));
+
+  this.legend_enable_window = new CheckboxWindow($("#legend-enable-window" + tid), ("legend-enable-checkbox" + tid), tid, false);
+  this.legend_enable_window.addCheckbox("legend-enable-option", "Show legend");
+
+  // methods
+  this.addData = function(node_name, time, data) {
+    // checks if the node has already been plotted before
+    if (this.tid_plot.nodeDoesNotExist(node_name)) {
+      this.series_checkbox_window.addCheckbox("series-checkbox-option", node_name);
+      this.tid_plot.addNode(node_name);
+    }
+
+    //adds data to the data array
+    this.tid_plot.addData(node_name, time, data);
+  };
+}
+
+function WindowEventManager() { // uses windows
+  // all methods
+  this.minChanged = function(tid, new_min) {
+    windows[tid].tid_plot.setMin(new_min);
+    windows[tid].tid_plot.refreshPlot();
+  };
+  this.maxChanged = function(tid, new_max) {
+    windows[tid].tid_plot.setMax(new_max);
+    windows[tid].tid_plot.refreshPlot();
+  };
+  this.toggledSeries = function(tid, node_name, checked) {
+    windows[tid].tid_plot.setNodeVisibility(node_name, checked);
+    windows[tid].tid_plot.refreshPlot();
+  };
+  this.dataFetched = function() {
+    count++;
+    url = BASE_URL + count.toString() + "/" + resolution_map.getURLShortcut(selected_resolution);
+
+    var tid;
+    for (tid in windows) {
+      windows[tid].tid_plot.refreshPlot();
+    }
+
+    setTimeout(fetch, UPDATE_INTERVAL);
+  };
+  this.nodataFetched = function() {
+    count--;
+    url = BASE_URL + count.toString() + "/" + resolution_map.getURLShortcut(selected_resolution);
+
+    var tid;
+    for (tid in windows) {
+      windows[tid].tid_plot.refreshPlot();
+    }
+
+    setTimeout(fetch, UPDATE_INTERVAL_NO);
+  };
+  
+  this.showLegendChanged = function(tid, checked) {
+    windows[tid].tid_plot.setLegendVisibility(checked);
+    windows[tid].tid_plot.refreshPlot();
+  };
+  this.resolutionChanged = function(id, resolution) {
+    if (resolution_map.resolutionExists(resolution)) {
+      $(".zoom-options-button").prop("disabled", false);
+      $("#" + id).prop("disabled", true);
+
+      selected_resolution = resolution;
+      windows[tid].tid_plot.changeResolution(resolution);
+    }
+    else {
+      console.log("Invalid resolution");
+    }
+  };
+}
+
+function fetch() {
+  console.log("Going to fetch from " + url);
+  console.log(count);
+  $.ajax ({
+    type: "GET",
+    dataType: "json",
+    url: url,
+    success: parse,
+    error: function() {
+      console.log("Error fetching data.")
+    }
+  });
+}
+
+function parse(results) {
+  var fetched_some_data = false;
+  for (tid in results) {
+    if (!(tid in windows)) {
+      windows[tid] = new TIDWindow($("#main-window"), tid);
+    }
+    for (node_name in results[tid]) {
+      var i;
+      for (i = 0; i < results[tid][node_name].length; i++) {
+        windows[tid].addData(node_name, results[tid][node_name][i]["ts"], results[tid][node_name][i]["sdata"]);
+      }
+    }
+    fetched_some_data = true;
+  }
+  if (fetched_some_data) {
+    event_manager.dataFetched();
+	  console.log("data fetched");
+  } else {
+	event_manager.nodataFetched();
+	  console.log(" no data fetched");
+  }
+}
+
+$(document).ready(function() {
+  $("body").on("change", ".min-setter", function() {
+    event_manager.minChanged($(this).attr("name"), $(this).val());
+  });
+
+  $("body").on("change", ".max-setter", function() {
+    event_manager.maxChanged($(this).attr("name"), $(this).val());
+  });
+
+  $("body").on("change", ".series-checkbox-option", function() {
+    console.log($(this).attr('checked'));
+    var checked = ($(this).attr('checked') == "checked") ? true : false;
+    event_manager.toggledSeries($(this).attr("name"), $(this).attr("value"), checked);
+  });
+
+  $("body").on("change", ".legend-enable-option", function() {
+    var checked = ($(this).attr('checked') == "checked") ? true : false;
+    event_manager.showLegendChanged($(this).attr("name"), checked);
+  });
+
+  $("body").on("click", ".zoom-options-button", function() {
+    var resolution = $(this).val();
+    var id = $(this).attr("id");
+    event_manager.resolutionChanged(id, resolution);
+  });
+
+  timezoneJS.timezone.zoneFileBasePath = "/etc/tz";
+  timezoneJS.timezone.defaultZoneFile = [];
+  timezoneJS.timezone.init({async: false});
+
+  fetch();
+});
+
+</script>
+
+
+  
+
+  </body>
+</html>
