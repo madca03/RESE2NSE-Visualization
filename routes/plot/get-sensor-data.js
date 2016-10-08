@@ -5,9 +5,10 @@ var id_query = "SELECT * FROM sensor_data WHERE ts >= \"last_update\" ORDER BY i
 var tid_obj = {};
 var src_obj = {};
 var sensor_data_obj = {};
-var count = 100;
+var count = 1000;
 var data_array_length;
 var ts, pid, src, tid, sdata;
+var src_dummy = require('binascii');
 var multiplier;
 var init_id = {};
 var last = 0;
@@ -17,6 +18,8 @@ var last_update_dt = 0;
 // DO PROCESSING FOR init_id BASED ON RESOLUTION HERE
 // init_id MUST BE DETERMINED BASED ON THE TIMESTAMP CORRESPONDING TO THE RESOLUTION
 // example for testing purposes only
+resolution = "10";
+init_id[resolution] = 0;
 resolution = "1h";
 init_id[resolution] = 0;
 resolution = "3h";
@@ -33,8 +36,22 @@ module.exports = function(req, res, next){
 	resolution = req.params.resolution;
 	
 	x = new Date().getTime();
-	if (x > (last + 3600000)){
+	x = x + (480*60000);
+	console.log(x + " , " + last);
+	if (x > (last + 600000)){
 		last = x;
+
+		last_update = x - 600000;
+		last_update_dt = new Date(last_update).toISOString().slice(0, 19).replace('T', ' ');
+		console.log(last_update_dt);
+		models.sequelize.query(id_query.replace("last_update", last_update_dt), {type: models.sequelize.QueryTypes.SELECT})
+			.then(function(resp){
+				if (typeof(resp[0]) != 'undefined'){
+					init_id["10"] = resp[0].id;
+					console.log("init_id\[\"10\"\] = " + init_id["10"]);
+				}
+			});
+	
 		last_update = x - 3600000;
 		last_update_dt = new Date(last_update).toISOString().slice(0, 19).replace('T', ' ');
 		console.log(last_update_dt);
@@ -109,9 +126,18 @@ module.exports = function(req, res, next){
 
 			ts = resp[i].ts;
 			pid = resp[i].ts;
-			src = resp[i].src;
+			src = parseInt(resp[i].src).toString(16);
 			tid = resp[i].tid;
-			sdata = resp[i].sdata;
+			//sdata = resp[i].sdata;
+			if (tid == 0){
+				//batter voltage
+				sdata = resp[i].sdata * 5.0 / 1023.0;
+			}else if (tid == 1){
+				//internal temp
+				sdata = ((resp[i].sdata*27069-18169625)/65536.0);
+			}else if (tid == 4 || tid == 5){
+				sdata = resp[i].sdata/10.0;
+			}
 
 			sensor_data_obj = {};
 			sensor_data_obj["ts"] = 1*ts;

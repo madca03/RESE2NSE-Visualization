@@ -20,10 +20,15 @@
             <div class="floor-links">
               <ul>
                 <li><span class="nav-side-heading">SHOW LAST</span><li>
-				<% if (resolution == "1 hr") {%>
-                  <li><a type = "button" class = "expanded success blocked button zoom-options-button" a href="/plot" disabled >1 hour</a></li>
+				<% if (resolution == "10 mins") {%>
+                  		  <li><a type = "button" class = "expanded success blocked button zoom-options-button" a href="/plot" disabled >10 mins</a></li>
 				<% } else { %>
-                  <li><a type = "button" class = "expanded success blocked button zoom-options-button" a href="/plot">1 hour</a></li>
+                  		  <li><a type = "button" class = "expanded success blocked button zoom-options-button" a href="/plot">10 mins</a></li>
+				<% } %>
+				<% if (resolution == "1 hr") {%>
+		                  <li><a type = "button" class = "expanded success blocked button zoom-options-button" a href="/plot/1hr" disabled >1 hour</a></li>
+				<% } else { %>
+		                  <li><a type = "button" class = "expanded success blocked button zoom-options-button" a href="/plot/1hr">1 hour</a></li>
 				<% } %>
 				<% if (resolution == "3 hrs") {%>
 				  <li><a type = "button" class = "expanded success blocked button zoom-options-button" a href="/plot/3hrs"  disabled >3 hours</a></li>
@@ -67,19 +72,19 @@
 
 STD_TICK_SIZE = 6;
 DEFAULT_RESOLUTION = "<%=resolution%>";
-RESOLUTIONS = ["1 hr", "3 hrs", "6 hrs", "12 hrs", "1 day"];
-SECONDS = [3600000, 10800000, 21600000, 43200000, 86400000];
-TIMEFORMATS = ["%H:%M:%S", "%H:%M", "%H:%M", "%H:%M", "%H:%M"];
+RESOLUTIONS = ["10 mins", "1 hr", "3 hrs", "6 hrs", "12 hrs", "1 day"];
+SECONDS = [600000, 3600000, 10800000, 21600000, 43200000, 86400000];
+TIMEFORMATS = ["%H:%M:%S", "%H:%M:%S", "%H:%M", "%H:%M", "%H:%M", "%H:%M"];
 // actual number of ticks would be RES_TO_SECONDS[ticks] / standard tick size
 
-DEFAULT_MIN = 200;
-DEFAULT_MAX = 900;
+DEFAULT_MIN = [2, 10, 10, 0, 10, 0];
+DEFAULT_MAX = [6, 50, 50, 100, 50, 100];
 LOWEST_MIN = 0;
 HIGHEST_MAX = 1000;
 
 UPDATE_INTERVAL = 30; // in ms
 UPDATE_INTERVAL_NO = 2000; // updated interval in ms when no additional data is found
-MAX_DATA_LENGTH = 4000000; // number of rows queried at a time
+MAX_DATA_LENGTH = 1000; // number of rows queried at a time
 BASE_URL = "/get_sensor_data/"
 
 var windows = {};
@@ -163,18 +168,26 @@ function NodeSeries(node_name, max_data_length) {
   this.addData = function(time, data) {
     // pushes the data into the data array
     this.data.push([time, data]);
-
-    if (this.data.length > 0) {
-      if ((time - this.data[0][0]) > this.max_spread) {
-        this.data.shift();
-      }
-      else if (this.data.length == this.max_data_length) {
-        this.data.shift();
-      }
-    }
   };
+  // removes old data exceeding the time scale
+  this.removeData = function(time){
+      if (this.data.length > 0) {
+        if ((time - this.data[0][0]) > this.max_spread) {
+          this.data.shift();
+        }
+        //else if (this.data.length == this.max_data_length) {
+        //  this.data.shift();
+        //}
+    }  
+  };
+
   this.getDates = function() {
     var options = {month: 'long', day: 'numeric'};
+
+    //added this next part so that it won't error when no new data for a node series
+    //if (this.data.length == 0){
+    //   return [];
+    //}
 
     var earliest_date = new Date(0);
     earliest_date.setUTCMilliseconds(this.data[0][0]);
@@ -239,6 +252,7 @@ function NodeSeries(node_name, max_data_length) {
 }
 
 function TIDPlot(tid, placeholder_id, min, max, resolution, title_container) {
+  var tid_names = ["Battery Voltage", "Internal Temperature", "DHT 11 Temperature", "DHT 11 Humidity", "DHT 22 Temperature", "DHT 22 Humidity"];
   this.tid = tid;
   this.nodes = {};
 
@@ -252,7 +266,7 @@ function TIDPlot(tid, placeholder_id, min, max, resolution, title_container) {
   this.resolution = resolution;
 
   this.plot = $.plot(("#" + placeholder_id), [], {
-    label: ("TID = " + this.tid),
+    label: (tid_names[this.tid]),
 		series: {
 		    shadowSize: 0,
         lines: {
@@ -289,6 +303,10 @@ function TIDPlot(tid, placeholder_id, min, max, resolution, title_container) {
     var dates = [];
 
     for (node in this.nodes) {
+      // added this if statement to ensure that nodeseries without data won't be queried
+      if (this.nodes[node].data.length == 0){
+          continue;
+      }
       if (this.nodes[node].isVisible()) {
           curr_dates = this.nodes[node].getDates();
           if (curr_dates.length > dates.length) {
@@ -317,6 +335,10 @@ function TIDPlot(tid, placeholder_id, min, max, resolution, title_container) {
   this.addData = function(node_name, time, data) {
     // adds new data to the data array
     this.nodes[node_name].addData(time, data);
+
+    // shifts out data exceeding the time scale
+    for (node in this.nodes)
+      this.nodes[node].removeData(time);
   };
   this.refreshPlot = function() {
     this.plot.setData(this.getData());
@@ -403,11 +425,12 @@ function MinmaxWindow(container, min_id, min_name, min_value, max_id, max_name, 
 
 
 function TIDWindow(container, tid) {
+  var tid_names = ["Battery Voltage", "Internal Temperature", "DHT 11 Temperature", "DHT 11 Humidity", "DHT 22 Temperature", "DHT 22 Humidity"];
   container.append("" +
   "<div class = 'row'>" +
       "<div class = 'callout'>" +
         "<div class = 'callout success text-center'>" +
-          "<h5>TID = " + tid + "</h5>" +
+          "<h5>" + tid_names[tid] + "</h5>" +
         "</div>" +
         "<div class = 'callout-body'>" +
 		
@@ -447,8 +470,8 @@ function TIDWindow(container, tid) {
   "</div>");
 
   this.series_checkbox_window = new CheckboxWindow($("#series-checkbox-window" + tid), ("checkbox-form-" + tid), tid, true);
-  this.minmax_window = new MinmaxWindow($("#minmax-window" + tid), ("min-setter" + tid), tid, DEFAULT_MIN, ("max-setter" + tid), tid, DEFAULT_MAX);
-  this.tid_plot = new TIDPlot(tid, ("tid-plot" + tid), DEFAULT_MIN, DEFAULT_MAX, DEFAULT_RESOLUTION, $("#plot-title" + tid));
+  this.minmax_window = new MinmaxWindow($("#minmax-window" + tid), ("min-setter" + tid), tid, DEFAULT_MIN[tid], ("max-setter" + tid), tid, DEFAULT_MAX[tid]);
+  this.tid_plot = new TIDPlot(tid, ("tid-plot" + tid), DEFAULT_MIN[tid], DEFAULT_MAX[tid], DEFAULT_RESOLUTION, $("#plot-title" + tid));
 
   this.legend_enable_window = new CheckboxWindow($("#legend-enable-window" + tid), ("legend-enable-checkbox" + tid), tid, false);
   this.legend_enable_window.addCheckbox("legend-enable-option", "Show legend");
@@ -480,8 +503,10 @@ function WindowEventManager() { // uses windows
     windows[tid].tid_plot.setNodeVisibility(node_name, checked);
     windows[tid].tid_plot.refreshPlot();
   };
-  this.dataFetched = function() {
-    count++;
+  this.dataFetched = function(res_len) {
+    if (res_len == MAX_DATA_LENGTH){
+      count++;
+    }
     url = BASE_URL + count.toString() + "/" + resolution_map.getURLShortcut(selected_resolution);
 
     var tid;
@@ -523,7 +548,7 @@ function WindowEventManager() { // uses windows
 
 function fetch() {
   console.log("Going to fetch from " + url);
-  console.log(count);
+  //console.log(count);
   $.ajax ({
     type: "GET",
     dataType: "json",
@@ -537,12 +562,14 @@ function fetch() {
 
 function parse(results) {
   var fetched_some_data = false;
+  var res_len = 0;
   for (tid in results) {
     if (!(tid in windows)) {
       windows[tid] = new TIDWindow($("#main-window"), tid);
     }
     for (node_name in results[tid]) {
       var i;
+      res_len = res_len + results[tid][node_name].length;
       for (i = 0; i < results[tid][node_name].length; i++) {
         windows[tid].addData(node_name, results[tid][node_name][i]["ts"], results[tid][node_name][i]["sdata"]);
       }
@@ -550,8 +577,8 @@ function parse(results) {
     fetched_some_data = true;
   }
   if (fetched_some_data) {
-    event_manager.dataFetched();
-	  console.log("data fetched");
+    event_manager.dataFetched(res_len);
+	  console.log("data " + res_len + "fetched");
   } else {
 	event_manager.nodataFetched();
 	  console.log(" no data fetched");
@@ -585,7 +612,7 @@ $(document).ready(function() {
   });
 
   timezoneJS.timezone.zoneFileBasePath = "/etc/tz";
-  timezoneJS.timezone.defaultZoneFile = [];
+  timezoneJS.timezone.defaultZoneFile = "asia";
   timezoneJS.timezone.init({async: false});
 
   fetch();

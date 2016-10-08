@@ -2,6 +2,10 @@ var express = require('express');
 var router = express.Router();
 
 router.get('/', function(req, res) {
+  res.render('plot', {title: 'Plot', resolution: '10 mins'});
+});
+
+router.get('/1hr', function(req, res) {
   res.render('plot', {title: 'Plot', resolution: '1 hr'});
 });
 
