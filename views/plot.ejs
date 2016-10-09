@@ -593,7 +593,13 @@ function parse(results) {
       var i;
       res_len = res_len + results[tid][node_name].length;
       for (i = 0; i < results[tid][node_name].length; i++) {
-        windows[tid].addData(node_name, results[tid][node_name][i]["ts"], results[tid][node_name][i]["sdata"]);
+        if (typeof windows[tid] !== 'undefined' && typeof windows[tid].tid_plot.nodes[node_name] !== 'undefined'){
+        if (windows[tid].tid_plot.nodes[node_name].data.length == 0 || windows[tid].tid_plot.nodes[node_name].data[windows[tid].tid_plot.nodes[node_name].data.length-1][0] < results[tid][node_name][i]["ts"]){
+          windows[tid].addData(node_name, results[tid][node_name][i]["ts"], results[tid][node_name][i]["sdata"]);
+        }
+        }else{
+          windows[tid].addData(node_name, results[tid][node_name][i]["ts"], results[tid][node_name][i]["sdata"]);
+        }
       }
     }
     fetched_some_data = true;
