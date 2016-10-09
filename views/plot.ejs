@@ -17,38 +17,44 @@
       <div class="row">
 	          <div class="small-3 columns">
           <div class="nav-side">
+            <div class="grp-select">
+              <select class = "group-options">
+                <option value="A" <% if (group == 'A') {%>selected<% } %> >A</option>
+                <option value="B" <% if (group == 'B') {%>selected<% } %> >B</option>
+              </select>
+            </div>
             <div class="floor-links">
               <ul>
                 <li><span class="nav-side-heading">SHOW LAST</span><li>
 				<% if (resolution == "10 mins") {%>
-                  		  <li><a type = "button" class = "expanded success blocked button zoom-options-button" a href="/plot" disabled >10 mins</a></li>
+                  		  <li><a type = "button" class = "expanded success blocked button zoom-options-button" a href="/plot/<%=group%>/10mins" disabled >10 mins</a></li>
 				<% } else { %>
-                  		  <li><a type = "button" class = "expanded success blocked button zoom-options-button" a href="/plot">10 mins</a></li>
+                  		  <li><a type = "button" class = "expanded success blocked button zoom-options-button" a href="/plot/<%=group%>/10mins">10 mins</a></li>
 				<% } %>
 				<% if (resolution == "1 hr") {%>
-		                  <li><a type = "button" class = "expanded success blocked button zoom-options-button" a href="/plot/1hr" disabled >1 hour</a></li>
+		                  <li><a type = "button" class = "expanded success blocked button zoom-options-button" a href="/plot/<%=group%>/1hr" disabled >1 hour</a></li>
 				<% } else { %>
-		                  <li><a type = "button" class = "expanded success blocked button zoom-options-button" a href="/plot/1hr">1 hour</a></li>
+		                  <li><a type = "button" class = "expanded success blocked button zoom-options-button" a href="/plot/<%=group%>/1hr">1 hour</a></li>
 				<% } %>
 				<% if (resolution == "3 hrs") {%>
-				  <li><a type = "button" class = "expanded success blocked button zoom-options-button" a href="/plot/3hrs"  disabled >3 hours</a></li>
+				  <li><a type = "button" class = "expanded success blocked button zoom-options-button" a href="/plot/<%=group%>/3hrs"  disabled >3 hours</a></li>
 				<% } else { %>
-				  <li><a type = "button" class = "expanded success blocked button zoom-options-button" a href="/plot/3hrs">3 hours</a></li>
+				  <li><a type = "button" class = "expanded success blocked button zoom-options-button" a href="/plot/<%=group%>/3hrs">3 hours</a></li>
 				<% } %>
 				<% if (resolution == "6 hrs") {%>
-				  <li><a type = "button" class = "expanded success blocked button zoom-options-button" a href="/plot/6hrs" disabled >6 hours</a></li>
+				  <li><a type = "button" class = "expanded success blocked button zoom-options-button" a href="/plot/<%=group%>/6hrs" disabled >6 hours</a></li>
 				<% } else { %>
-				  <li><a type = "button" class = "expanded success blocked button zoom-options-button" a href="/plot/6hrs">6 hours</a></li>
+				  <li><a type = "button" class = "expanded success blocked button zoom-options-button" a href="/plot/<%=group%>/6hrs">6 hours</a></li>
 				<% } %>
 				<% if (resolution == "12 hrs") {%>
-				  <li><a type = "button" class = "expanded success blocked button zoom-options-button" a href="/plot/12hrs" disabled >12 hours</a></li>
+				  <li><a type = "button" class = "expanded success blocked button zoom-options-button" a href="/plot/<%=group%>/12hrs" disabled >12 hours</a></li>
 				<% } else { %>
-				  <li><a type = "button" class = "expanded success blocked button zoom-options-button" a href="/plot/12hrs">12 hours</a></li>
+				  <li><a type = "button" class = "expanded success blocked button zoom-options-button" a href="/plot/<%=group%>/12hrs">12 hours</a></li>
 				<% } %>
 				<% if (resolution == "1 day") {%>
-				  <li><a type = "button" class = "expanded success blocked button zoom-options-button" a href="/plot/1day" disabled >1 day</a></li>
+				  <li><a type = "button" class = "expanded success blocked button zoom-options-button" a href="/plot/<%=group%>/1day" disabled >1 day</a></li>
 				<% } else { %>
-				  <li><a type = "button" class = "expanded success blocked button zoom-options-button" a href="/plot/1day">1 day</a></li>
+				  <li><a type = "button" class = "expanded success blocked button zoom-options-button" a href="/plot/<%=group%>/1day">1 day</a></li>
 				<% } %>
 
               </ul>
@@ -72,6 +78,7 @@
 
 STD_TICK_SIZE = 6;
 DEFAULT_RESOLUTION = "<%=resolution%>";
+DEFAULT_GROUP = "<%=group%>";
 RESOLUTIONS = ["10 mins", "1 hr", "3 hrs", "6 hrs", "12 hrs", "1 day"];
 SECONDS = [600000, 3600000, 10800000, 21600000, 43200000, 86400000];
 TIMEFORMATS = ["%H:%M:%S", "%H:%M:%S", "%H:%M", "%H:%M", "%H:%M", "%H:%M"];
@@ -532,6 +539,12 @@ function WindowEventManager() { // uses windows
     windows[tid].tid_plot.setLegendVisibility(checked);
     windows[tid].tid_plot.refreshPlot();
   };
+
+  this.groupChanged = function(group, resolution) {
+    resolution = resolution.replace(/\s+/g, '');
+    window.location.replace('/plot/' + group + '/' + resolution);
+  };
+
   this.resolutionChanged = function(id, resolution) {
     if (resolution_map.resolutionExists(resolution)) {
       $(".zoom-options-button").prop("disabled", false);
@@ -609,6 +622,11 @@ $(document).ready(function() {
     var resolution = $(this).val();
     var id = $(this).attr("id");
     event_manager.resolutionChanged(id, resolution);
+  });
+
+  $("body").on("change", ".group-options", function() {
+    var group = $(this).val();
+    event_manager.groupChanged(group, DEFAULT_RESOLUTION);
   });
 
   timezoneJS.timezone.zoneFileBasePath = "/etc/tz";
