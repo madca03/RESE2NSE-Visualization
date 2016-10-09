@@ -34,6 +34,7 @@ init_id[resolution] = 0;
 module.exports = function(req, res, next){
 	multiplier = req.params.multiplier;
 	resolution = req.params.resolution;
+	group = req.params.group;
 	
 	x = new Date().getTime();
 	x = x + (480*60000);
