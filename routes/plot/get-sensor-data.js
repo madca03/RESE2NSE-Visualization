@@ -145,6 +145,12 @@ module.exports = function(req, res, next){
 				sdata = ((resp[i].sdata*27069-18169625)/65536.0);
 			}else if (tid == 4 || tid == 5){
 				sdata = resp[i].sdata/10.0;
+			}else if (tid == 60 || tid == 61){
+				sdata = (resp[i].sdata*0.00021*1000);
+			}else if (tid == 62 || tid == 65 || tid == 68){
+				sdata = 1/(resp[i].sdata*0.00021);
+			}else{
+				sdata = (resp[i].sdata-475)*(3.3/1024)*30;
 			}
 			sdata = sdata / 1.0;
 			sdata = sdata.toFixed(2);

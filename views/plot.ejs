@@ -22,6 +22,7 @@
                 <option value="r203" <% if (group == 'r203') {%>selected<% } %> >Rm 203</option>
                 <option value="c2f" <% if (group == 'c2f') {%>selected<% } %> >2nd Floor Corridor</option>
                 <option value="c3f" <% if (group == 'c3f') {%>selected<% } %> >3rd Floor Corridor</option>
+                <option value="pp" <% if (group == 'pp') {%>selected<% } %> >Power Panels</option>
               </select>
             </div>
             <div class="floor-links">
@@ -85,8 +86,8 @@ SECONDS = [600000, 3600000, 10800000, 21600000, 43200000, 86400000];
 TIMEFORMATS = ["%H:%M:%S", "%H:%M:%S", "%H:%M", "%H:%M", "%H:%M", "%H:%M"];
 // actual number of ticks would be RES_TO_SECONDS[ticks] / standard tick size
 
-DEFAULT_MIN = [2, 10, 10, 0, 10, 0];
-DEFAULT_MAX = [6, 50, 50, 100, 50, 100];
+DEFAULT_MIN = {0: 2.5, 1: 15, 2: 15, 3: 0, 4: 15, 5: 0, 60: -100, 61: -100, 62: 20, 63: 0, 64: -15, 65: 20, 66: 0, 67: -15, 68: 20, 69: 0, 70: -15};
+DEFAULT_MAX = {0: 5, 1: 40, 2: 40, 3: 100, 4: 40, 5: 100, 60: 100, 61: 100, 62: 80, 63: 15, 64: 0, 65: 80, 66: 15, 67: 0, 68: 80, 69: 15, 70: 0};
 LOWEST_MIN = 0;
 HIGHEST_MAX = 1000;
 
@@ -260,7 +261,8 @@ function NodeSeries(node_name, max_data_length) {
 }
 
 function TIDPlot(tid, placeholder_id, min, max, resolution, title_container) {
-  var tid_names = ["Battery Voltage", "Internal Temperature", "DHT 11 Temperature", "DHT 11 Humidity", "DHT 22 Temperature", "DHT 22 Humidity"];
+  var tid_names = {0: "Battery Voltage", 1: "Internal Temperature", 2: "DHT 11 Temperature", 3: "DHT 11 Humidity", 4: "DHT 22 Temperature", 5: "DHT 22 Humidity", 60: "Frequency Difference of Line 2 and 3", 61: "Frequency Difference of Line 1 and 2", 62: "Frequency of Line 3", 63: "Max Current of Line 3", 64: "Min Current of Line 3", 65: "Frequency of Line 2", 66: "Max Current of Line 2", 67: "Min Current of Line 2", 68: "Frequency of Line 1", 69: "Max Current of Line 1", 70: "Min Current of Line 1"};
+
   this.tid = tid;
   this.nodes = {};
 
@@ -433,7 +435,7 @@ function MinmaxWindow(container, min_id, min_name, min_value, max_id, max_name, 
 
 
 function TIDWindow(container, tid) {
-  var tid_names = ["Battery Voltage", "Internal Temperature", "DHT 11 Temperature", "DHT 11 Humidity", "DHT 22 Temperature", "DHT 22 Humidity"];
+  var tid_names = {0: "Battery Voltage (V)", 1: "Internal Temperature (deg C)", 2: "DHT 11 Temperature", 3: "DHT 11 Humidity", 4: "DHT 22 Temperature (deg C)", 5: "DHT 22 Humidity (%)", 60: "Period Difference of Line 2 and 3 (ms)", 61: "Period Difference of Line 1 and 2 (ms)", 62: "Frequency of Line 3 (Hz)", 63: "Max Current of Line 3 (A)", 64: "Min Current of Line 3 (A)", 65: "Frequency of Line 2 (Hz)", 66: "Max Current of Line 2 (A)", 67: "Min Current of Line 2 (A)", 68: "Frequency of Line 1 (Hz)", 69: "Max Current of Line 1 (A)", 70: "Min Current of Line 1 (A)"};
   container.append("" +
   "<div class = 'row'>" +
       "<div class = 'callout'>" +
