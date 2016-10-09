@@ -1,7 +1,9 @@
 var models = require('../../models/index');
 
-var nextData_query = "SELECT id,ts,pid,src,tid,sdata FROM sensor_data WHERE id > init_id ORDER BY id ASC LIMIT count";
-var id_query = "SELECT * FROM sensor_data WHERE ts >= \"last_update\" ORDER BY id ASC LIMIT 1";
+//var nextData_query = "SELECT id,ts,pid,src,tid,sdata FROM sensor_data WHERE id > init_id ORDER BY id ASC LIMIT count";
+var nextData_query_temp = "SELECT sensor_data.* FROM sensor_data JOIN tags WHERE sensor_data.src = tags.src AND tags.tag = \"current_tag\" AND id > init_id ORDER BY id ASC LIMIT count";
+//var id_query = "SELECT * FROM sensor_data WHERE ts >= \"last_update\" ORDER BY id ASC LIMIT 1";
+var id_query_temp = "SELECT sensor_data.* FROM sensor_data JOIN tags WHERE sensor_data.src = tags.src AND tags.tag = \"current_tag\" AND ts >= \"last_update\" ORDER BY id ASC LIMIT 1";
 var tid_obj = {};
 var src_obj = {};
 var sensor_data_obj = {};
@@ -35,6 +37,11 @@ module.exports = function(req, res, next){
 	multiplier = req.params.multiplier;
 	resolution = req.params.resolution;
 	group = req.params.group;
+
+	console.log(req.params);
+
+	id_query = id_query_temp.replace("current_tag", group);
+	nextData_query = nextData_query_temp.replace("current_tag", group);
 	
 	x = new Date().getTime();
 	x = x + (480*60000);

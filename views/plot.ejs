@@ -19,8 +19,9 @@
           <div class="nav-side">
             <div class="grp-select">
               <select class = "group-options">
-                <option value="A" <% if (group == 'A') {%>selected<% } %> >A</option>
-                <option value="B" <% if (group == 'B') {%>selected<% } %> >B</option>
+                <option value="r203" <% if (group == 'r203') {%>selected<% } %> >Rm 203</option>
+                <option value="c2f" <% if (group == 'c2f') {%>selected<% } %> >2nd Floor Corridor</option>
+                <option value="c3f" <% if (group == 'c3f') {%>selected<% } %> >3rd Floor Corridor</option>
               </select>
             </div>
             <div class="floor-links">
@@ -100,7 +101,7 @@ var event_manager = new WindowEventManager();
 
 var count = 0;
 var selected_resolution = DEFAULT_RESOLUTION;
-var url = BASE_URL + count.toString() + "/" + resolution_map.getURLShortcut(selected_resolution);
+var url = BASE_URL + count.toString() + "/" + DEFAULT_GROUP + "/" + resolution_map.getURLShortcut(selected_resolution);
 
 function ResolutionMapElement(seconds, timeformat) {
   this.seconds = seconds;
@@ -514,7 +515,7 @@ function WindowEventManager() { // uses windows
     if (res_len == MAX_DATA_LENGTH){
       count++;
     }
-    url = BASE_URL + count.toString() + "/" + resolution_map.getURLShortcut(selected_resolution);
+    url = BASE_URL + count.toString() + "/" + DEFAULT_GROUP + "/" + resolution_map.getURLShortcut(selected_resolution);
 
     var tid;
     for (tid in windows) {
@@ -525,7 +526,7 @@ function WindowEventManager() { // uses windows
   };
   this.nodataFetched = function() {
     count--;
-    url = BASE_URL + count.toString() + "/" + resolution_map.getURLShortcut(selected_resolution);
+    url = BASE_URL + count.toString() + "/" + DEFAULT_GROUP + "/" + resolution_map.getURLShortcut(selected_resolution);
 
     var tid;
     for (tid in windows) {
