@@ -8,6 +8,7 @@ var tid_obj = {};
 var src_obj = {};
 var sensor_data_obj = {};
 var count = 1000;
+var prev_count = 0;
 var data_array_length;
 var ts, pid, src, tid, sdata;
 var src_dummy = require('binascii');
@@ -124,7 +125,7 @@ module.exports = function(req, res, next){
 			console.log("Retrieved " + resp.length + " rows of data");
 
 		// wraps the data structures such that the data is in JSON format
-		for (i = 0; i < count; i++){
+		for (i = prev_count; i < count; i++){
 			// handles empty query results, which means that there is no new data yet
 			if (typeof(resp[i]) == 'undefined'){
 				if (resp.length == 0)
@@ -167,6 +168,12 @@ module.exports = function(req, res, next){
 
 			data_array_length = tid_obj[tid][src].length
 			tid_obj[tid][src][data_array_length] = sensor_data_obj;
+		}
+
+		if (resp.length == count){
+			prev_count = 0;
+		}else{
+			prev_count = resp.length;
 		}
 		
 		json_data = [JSON.stringify(tid_obj)];

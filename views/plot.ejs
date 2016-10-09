@@ -101,6 +101,7 @@ var resolution_map = new ResolutionMap(RESOLUTIONS, SECONDS, TIMEFORMATS);
 var event_manager = new WindowEventManager();
 
 var count = 0;
+var count_data = 0;
 var selected_resolution = DEFAULT_RESOLUTION;
 var url = BASE_URL + count.toString() + "/" + DEFAULT_GROUP + "/" + resolution_map.getURLShortcut(selected_resolution);
 
@@ -516,6 +517,12 @@ function WindowEventManager() { // uses windows
   this.dataFetched = function(res_len) {
     if (res_len == MAX_DATA_LENGTH){
       count++;
+      count_data = 0;
+    }else if (count_data == MAX_DATA_LENGTH){
+      count++;
+      count_data = 0;
+    }else{
+      count_data = count_data + res_len;
     }
     url = BASE_URL + count.toString() + "/" + DEFAULT_GROUP + "/" + resolution_map.getURLShortcut(selected_resolution);
 
@@ -527,7 +534,6 @@ function WindowEventManager() { // uses windows
     setTimeout(fetch, UPDATE_INTERVAL);
   };
   this.nodataFetched = function() {
-    count--;
     url = BASE_URL + count.toString() + "/" + DEFAULT_GROUP + "/" + resolution_map.getURLShortcut(selected_resolution);
 
     var tid;
