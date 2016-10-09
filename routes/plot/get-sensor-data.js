@@ -138,6 +138,7 @@ module.exports = function(req, res, next){
 			}else if (tid == 4 || tid == 5){
 				sdata = resp[i].sdata/10.0;
 			}
+			sdata = sdata / 1.0;
 			sdata = sdata.toFixed(2);
 
 			sensor_data_obj = {};
