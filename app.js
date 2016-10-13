@@ -39,11 +39,12 @@ app.use(express.static(path.join(__dirname, 'public')));
 // });
 // =======
 app.use('/', graph);
-app.use('/', routes);
-app.use('/graph', graph);
-app.use('/', nodes);
-app.use('/plot', plot);
 app.use('/nodes', nodes);
+// app.use('/', routes);
+// app.use('/graph', graph);
+// app.use('/', nodes);
+app.use('/plot', plot);
+
 // >>>>>>> add code from mark's repo
 
 // catch 404 and forward to error handler
