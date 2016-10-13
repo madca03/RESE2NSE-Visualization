@@ -1,45 +1,40 @@
 'use strict';
 module.exports = function(sequelize, DataTypes) {
   var Node_archive = sequelize.define('Node_archive', {
-    node_id: {
-      type: DataTypes.STRING,
-      allowNull: false
-    },
-    label: {
-      type: DataTypes.STRING,
-      allowNull: false
-    },
-    x: {
-      type: DataTypes.DOUBLE,
-      defaultValue: null
-    },
-    y: {
-      type: DataTypes.DOUBLE,
-      defaultValue: null
-    },
-    coordinate_set: {
-      type: DataTypes.BOOLEAN,
+    id: {
       allowNull: false,
-      defaultValue: false
+      primaryKey: true,
+      autoIncrement: true,
+      type: DataTypes.INTEGER
     },
-    sensor_type: {
-      type: DataTypes.STRING
+    node_id: {
+      allowNull: false,
+      type: DataTypes.INTEGER
     },
-    mac_address: {
-      type: DataTypes.STRING
+    x_coordinate: {
+      type: DataTypes.DOUBLE,
+      defaultValue: null
+    },
+    y_coordinate: {
+      type: DataTypes.DOUBLE,
+      defaultValue: null
     },
     last_transmission: {
+      allowNull: false,
       type: DataTypes.STRING
     },
     packets_sent: {
+      allowNull: false,
       type: DataTypes.INTEGER
     },
     packets_received: {
+      allowNull: false,
       type: DataTypes.INTEGER
     },
-    floor_number: {
+    date_created_id: {
+      allowNull: false,
       type: DataTypes.INTEGER
-    }
+    },
   }, {
     classMethods: {
       associate: function(models) {

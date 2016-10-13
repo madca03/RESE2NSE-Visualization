@@ -5,7 +5,10 @@ module.exports = function(sequelize, DataTypes) {
     pid: DataTypes.INTEGER,
     src: DataTypes.STRING,
     tid: DataTypes.STRING,
-    sdata: DataTypes.INTEGER
+    sdata: DataTypes.INTEGER,
+    node_id: DataTypes.INTEGER,
+    sensor_type_id: DataTypes.INTEGER,
+    value: DataTypes.DOUBLE
   }, {
     timestamp: false,
     classMethods: {

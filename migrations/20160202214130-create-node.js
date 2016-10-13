@@ -12,10 +12,6 @@ module.exports = {
         type: Sequelize.STRING,
         allowNull: false
       },
-      sensor_id: {
-        type: Sequelize.INTEGER,
-        allowNull: false
-      },
       mac_address: {
         type: Sequelize.STRING,
         allowNull: false
@@ -23,6 +19,10 @@ module.exports = {
       floor_id: {
         type: Sequelize.INTEGER,
         allowNull: false
+      },
+      coordinate_set: {
+        type: Sequelize.BOOLEAN,
+        defaultValue: false
       },
       created_at: {
         allowNull: false,

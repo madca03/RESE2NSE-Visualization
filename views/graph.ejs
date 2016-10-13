@@ -7,14 +7,11 @@
   </head>
 
   <body>
-    <header>
-		<% include ./partials/header %>
-    </header> <!-- end header -->
-	<% include ./partials/nav %>
-		
+    <header><% include ./partials/header %></header> <!-- end header -->
+	  <% include ./partials/nav %>
+
     <div class="main">
       <div class="row">
-
         <div class="small-3 columns">
           <div class="nav-side">
             <div class="floor-links">
@@ -32,37 +29,48 @@
           </div> <!-- end .nav-side -->
         </div> <!-- end .columns -->
 
+        <!-- Graph Display -->
         <div class="small-9 columns">
           <div class="floor-group">
 
-            <% for (var i = 0; i < floorCount; i++) { %>
-              <% var floorID = "floor" + (i + 1) %>
-              <% var floorNumber = i + 1 %>
-              <% var imageID = "floor" + (i + 1) + "-img" %>
-              <% var sliderID = "slider-range-" + (i + 1) %>
+            <div class="floor">
+              <div class="floor-label">
+                <span>Floors</span>
+                <button type="button" class="success button edit-btn">Edit Graph</button>
+                <select id="info-selector">
+                  <option value="Network" selected>Network</option>
+                  <option value="1">Humidity</option>
+                  <option value="2">Temperature</option>
+                  <option value="3">Light</option>
+                  <option value="4">Pressure</option>
+                </select>
+              </div> <!-- end .floor-label -->
 
-              <div class="floor" id="<%= floorID %>">
-                <div class="floor-label">
-                  <span>Floor <%= floorNumber %></span>
-                  <button type="button" class="success button edit-btn" data-floor-number=<%= floorNumber %>>Edit Graph</button>
-                </div> <!-- end .floor-label -->
-                <div class="floor-graph">
-                  <div class='graph-container'>
-                    <img src='/images/floorplan7.jpg' class="floor-img" id="<%= imageID %>">
-                  </div> <!-- end .graph-container -->
+              <div class="floor-graph">
+                <div class='graph-container'>
+                  <img src='/images/floorplan-merge.jpg' class="floor-img">
+                </div> <!-- end .graph-container -->
 
-                  <div class="slider-container">
-                    <div class="slider-label">
-                      <span>Time: </span>
-                      <span class="slider-time" id="slider-time-<%= (i + 1) %>"></span>
-                    </div> <!-- end .slider-label -->
-                    <div class="slider-range" id="<%= sliderID %>" data-floor-number=<%= floorNumber %>></div>
-                  </div> <!-- end .slider-container -->
-                </div> <!-- end .floor-graph -->
-              </div> <!-- end .floor#floor_ -->
+                <div class="slider-container">
+                  <div class="slider-label">
+                    <span>Time: </span>
+                    <span class="slider-time"></span>
+                  </div> <!-- end .slider-label -->
+                  <div class="slider-range"></div>
+                </div> <!-- end .slider-container -->
 
-            <% } %>
-
+                <div class='range-selector'>
+                  <label>Range
+                    <select class="range-menu">
+                      <option value="MINUTE_1">1 Minute</option>
+                      <option value="MINUTE_2">2 Minutes</option>
+                      <option value="MINUTE_3">3 Minutes</option>
+                      <option value="all_all" selected>All</option>
+                    </select>
+                  </label>
+                </div> <!-- end .range-selector -->
+              </div> <!-- end .floor-graph -->
+            </div> <!-- end .floor#floor_ -->
           </div> <!-- end .floor-group -->
         </div> <!-- end .columns -->
       </div> <!-- end .row -->
@@ -76,12 +84,12 @@
   <script src="/javascripts/foundation.min.js"></script>
   <script src="/javascripts/d3.v3.min.js"></script>
   <script src="/javascripts/jquery.qtip.min.js"></script>
-  
-  <script src="/javascripts/single-graph-drawer.js"></script>
-  <script src="/javascripts/multi-graph-drawer.js"></script>
-  <script src="/javascripts/floor.js"></script>
-  <script src="/javascripts/event-handler.js"></script>
-  <script src="/javascripts/graph-data-fetcher.js"></script>
+
   <script src="/javascripts/ui.js"></script>
+  <script src="/javascripts/data-fetcher.js"></script>
+  <script src="/javascripts/slider.js"></script>
+  <script src="/javascripts/event-handler.js"></script>
+  <script src="/javascripts/graph-drawer.js"></script>
   <script src="/javascripts/graph.js"></script>
+  <script src="/javascripts/main.js"></script>
 </html>

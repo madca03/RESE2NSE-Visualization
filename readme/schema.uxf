@@ -1,0 +1,200 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<diagram program="umlet" version="14.2">
+  <zoom_level>10</zoom_level>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>40</x>
+      <y>0</y>
+      <w>210</w>
+      <h>220</h>
+    </coordinates>
+    <panel_attributes>nodes
+--
+-id: int
+-label: varchar(255)
+-mac_address: varchar(255)
+-floor_id: int
+-coordinate_set: tinyint(1)
+-created_at: datetime
+-updated_at: datetime
+
+--
+* holds nodes' constant values
+* has_many sensor_data
+* has_many links
+</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>40</x>
+      <y>480</y>
+      <w>210</w>
+      <h>200</h>
+    </coordinates>
+    <panel_attributes>nodes_archive
+--
+-id: int
+-node_id: int
+-x_coordinate: double
+-y_coordinate: double
+-last_transmission: varchar(255)
+-packets_sent: int
+-packets_received: int
+-date_created_id: int
+
+--
+* copy of nodes_present</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>40</x>
+      <y>240</y>
+      <w>210</w>
+      <h>220</h>
+    </coordinates>
+    <panel_attributes>nodes_present
+--
+-id: int
+-node_id: int
+-x_coordinate: double
+-y_coordinate: double
+-last_transmission: varchar(255)
+-packets_sent: int
+-packets_received: int
+-created_at: datetime
+
+--
+* holds nodes' frequently 
+changing data</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>280</x>
+      <y>160</y>
+      <w>210</w>
+      <h>180</h>
+    </coordinates>
+    <panel_attributes>links_archive
+--
+-id: int
+-link_id: int
+-source_id: int
+-target_id: int
+-traffic_id: int
+-floor_id: int
+-date_created_id: int
+
+--
+* copy of links_present
+</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>280</x>
+      <y>0</y>
+      <w>210</w>
+      <h>140</h>
+    </coordinates>
+    <panel_attributes>links_present
+--
+-id: int
+-source_id: int
+-target_id: int
+-traffic_id: int
+-floor_id: int
+-created_at: datetime
+
+</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>770</x>
+      <y>0</y>
+      <w>210</w>
+      <h>120</h>
+    </coordinates>
+    <panel_attributes>datetime_archive
+--
+-id: int
+-datetime_archive: datetime
+
+--
+* holds the dates when the table 
+was archived</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>530</x>
+      <y>0</y>
+      <w>220</w>
+      <h>200</h>
+    </coordinates>
+    <panel_attributes>sensor_data
+--
+-id: int
+-node_id: int
+-sensor_type_id: int
+-value: double
+-created_at: datetime
+
+--
+* belongs_to a sensor_type
+* belongs_to a node
+* join table for nodes and 
+sensor_type</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>530</x>
+      <y>220</y>
+      <w>220</w>
+      <h>150</h>
+    </coordinates>
+    <panel_attributes>sensor_data_archive
+--
+-id: int
+-node_id: int
+-sensor_type_id: int
+-value: double
+-date_created_id: int
+
+--
+* copy of "sensor_data" table
+
+</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>530</x>
+      <y>390</y>
+      <w>220</w>
+      <h>110</h>
+    </coordinates>
+    <panel_attributes>sensor_type
+--
+-id: int
+-type: varchar(255)
+
+--
+* has_many sensor_data
+</panel_attributes>
+    <additional_attributes/>
+  </element>
+</diagram>

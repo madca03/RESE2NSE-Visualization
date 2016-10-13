@@ -5,10 +5,17 @@ var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 
+// <<<<<<< 5a2dd2b2873fdc9a0127d6e6291452a9619b29ce
+
+// var nodes = require('./routes/nodes/nodes');
+// var graph = require('./routes/graph/graph');
+
+// =======
 var routes = require('./routes/index');
-var graph = require('./routes/graph/graph');
-var nodes = require('./routes/nodes/nodes');
 var plot = require('./routes/plot/plot');
+var graph = require('./routes/graph/index');
+var nodes = require('./routes/nodes/index');
+// >>>>>>> add code from mark's repo
 
 var app = express();
 
@@ -24,14 +31,20 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.use('/', routes);
-app.use('/graph', graph);
-app.use('/', nodes);
-app.use('/plot', plot);
+// <<<<<<< 5a2dd2b2873fdc9a0127d6e6291452a9619b29ce
+
 
 // app.get('/plot', function(req, res) {
    // res.render('plot');
 // });
+// =======
+app.use('/', graph);
+app.use('/', routes);
+app.use('/graph', graph);
+app.use('/', nodes);
+app.use('/plot', plot);
+app.use('/nodes', nodes);
+// >>>>>>> add code from mark's repo
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

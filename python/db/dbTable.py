@@ -1,16 +1,19 @@
 import random
 import string
 from seeder.linkPresentSeeder import linkPresentSeeder
+from seeder.sensorDataSeeder import sensorDataSeeder
 from datetime import datetime
 
 class tableManager:
     def __init__(self, db_client):
         self._db_tables = {'nodes_present': nodesPresentTable(db_client),
-                           'links_present': linksPresentTable(db_client)}
+                           'links_present': linksPresentTable(db_client),
+                           'sensor_data': sensorDataTable(db_client)}
 
     def generate_random_data(self):
         self._generate_random_data('nodes_present')
         self._generate_random_data('links_present')
+        self._generate_random_data('sensor_data')
 
     def _generate_random_data(self, table):
         if table in self._db_tables:
@@ -31,6 +34,26 @@ class table:
         self.cursor.execute(query)
         (count,) = self.cursor.fetchone()
         return count
+
+class sensorDataTable(table):
+    def remove_data(self):
+        self.cursor.execute('DELETE FROM sensor_data;')
+        self.db_client.commit()
+
+    def sensor_data_creation_date(self):
+        query = 'SELECT DISTINCT(created_at) FROM nodes_present;'
+        self.cursor.execute(query)
+        (created_at,) = self.cursor.fetchone()
+        return created_at
+
+    def update(self):
+        node_count = self.data_count('nodes');
+        sensors_count = self.data_count('sensor_type')
+        creation_date = self.sensor_data_creation_date()
+
+        self.remove_data()
+        sensorDataSeeder(self.db_client, node_count, sensors_count,
+            creation_date).seed()
 
 class linksPresentTable(table):
     def remove_data(self):
