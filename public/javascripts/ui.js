@@ -24,17 +24,18 @@ UI.prototype.setFloorImageDimensions = function() {
   /* SVG stage and floorplan image properties */
   var graph_container = $(".graph-container");
   var floor_img = $(".floor-img");
-  var img_border = parseFloat($(floor_img).css('border-top-width'));
-  var container_width = parseFloat($(graph_container).css('width'));
+
+
 
   /* don't use the height of the div.graph-container, use the height of the
   image instead */
-  var img_height = parseFloat($(floor_img).css('height'));
-
+  var container_width = parseFloat($(graph_container).css('width'));
+  var img_border = parseFloat($(floor_img).css('border-top-width'));
   this.svgWidth = container_width - img_border;
-  this.svgHeight = img_height - img_border;
-
   $(floor_img).css("width", this.svgWidth.toString() + 'px');
+
+  var img_height = parseFloat($(floor_img).css('height'));
+  this.svgHeight = img_height - img_border;
   $(graph_container).css('height', img_height);
 }
 

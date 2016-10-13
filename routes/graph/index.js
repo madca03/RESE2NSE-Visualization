@@ -18,7 +18,7 @@ router.get('/contour', require('./display-contour.js'));
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
-  res.render('index');
+  res.render('index', {title: 'Home'});
 });
 
 router.get('/graph', function(req, res, next) {
@@ -28,7 +28,7 @@ router.get('/graph', function(req, res, next) {
     .then(function(count) {
       var floorCount = count[0]["floor_count"];
 
-      res.render('graph', {floorCount: floorCount})
+      res.render('graph', {floorCount: floorCount, title: 'Graph'})
     });
 });
 
