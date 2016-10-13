@@ -1,0 +1,20 @@
+1. nodes
+  - contains node information that are constant (i.e. mac address, node label,
+  floor number) or can be change only once (i.e. coordinate_set)
+2. nodes_present
+  - contains node information that are frequently changing
+3. nodes_archive
+  - copy of the "nodes_present" table
+4. links_present
+  - contains the information about the current links
+5. links_archive
+  - copy of the "links_present" table
+6. datetime_archive
+  - contains the datetime when the tables were archived
+7. sensor_data
+  - contains the current sensor values of the nodes
+8. sensor_data_archive
+  - copy of the "sensor_data_archive"
+9. sensor_type
+  - contains properties of each type of sensor (i.e. sensor name)
+10.

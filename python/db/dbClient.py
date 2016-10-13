@@ -86,7 +86,7 @@ class dbClient:
 
         db_tables = ['datetime_archive', 'floors', 'links_archive',
             'links_present', 'nodes', 'nodes_archive', 'nodes_present',
-            'sensors', 'traffic', 'configurations', 'sensor_data']
+            'sensors', 'traffic', 'configurations']
 
         for (table,) in rows:
             if table in db_tables:
