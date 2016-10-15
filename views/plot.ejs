@@ -223,11 +223,12 @@ function NodeSeries(node_name, max_data_length) {
       return [];
     }
   }
-  this.getPlotDict = function(show_legend) {
+  this.getPlotDict = function(show_legend, ci) { //ci for color control
     if (show_legend) {
       return {
         label: this.name,
         data: this.getData(),
+	color: ci,
         lines: {
           show: true
         }
@@ -237,6 +238,7 @@ function NodeSeries(node_name, max_data_length) {
       return {
         label: null,
         data: this.getData(),
+	color: ci,
         lines: {
           show: true
         }
@@ -313,9 +315,9 @@ function TIDPlot(tid, placeholder_id, min, max, resolution, title_container) {
   this.getData = function() { // gets displayable data
     var data = [];
     var dates = [];
-
+    var i = 0; //color index
     for (node in this.nodes) {
-      // added this if statement to ensure that nodeseries without data won't be queried
+      // added this if statement to ensure that nodeseries without data will not be queried
       if (this.nodes[node].data.length == 0){
           continue;
       }
@@ -326,6 +328,7 @@ function TIDPlot(tid, placeholder_id, min, max, resolution, title_container) {
           }
           data.push(this.nodes[node].getPlotDict(this.show_legend));
       }
+      ++i;
       this.setPlotTitle(dates);
     }
     return data;
@@ -413,7 +416,10 @@ function CheckboxWindow(container, id, name, put_well) {
     this.selector.append(
 	"<label ><input style='margin:0;' class = 'checkbox " + class_name + "' checked = 'checked' type = 'checkbox' name = '" + this.name + "' value = '" + value + "'>" + value + "</label>");
   };
-	
+  this.addButton = function(class_name, value) {
+    this.selector.append(
+        "<div><input style='margin:10;' class = 'button " + class_name + "' type = 'button' name = '" + this.name + "' value = '" + value + "'></div>");
+  };	
 }
 
 
@@ -498,6 +504,10 @@ function TIDWindow(container, tid) {
 
     //adds data to the data array
     this.tid_plot.addData(node_name, time, data);
+  };
+
+  this.addSD = function(class_name, button_name) {
+    this.series_checkbox_window.addButton(class_name, button_name);
   };
 }
 
@@ -589,6 +599,8 @@ function parse(results) {
   for (tid in results) {
     if (!(tid in windows)) {
       windows[tid] = new TIDWindow($("#main-window"), tid);
+      windows[tid].addSD("selall","Select All");
+      windows[tid].addSD("deselall","Clear");
     }
     for (node_name in results[tid]) {
       var i;
@@ -621,6 +633,26 @@ $(document).ready(function() {
 
   $("body").on("change", ".max-setter", function() {
     event_manager.maxChanged($(this).attr("name"), $(this).val());
+  });
+
+  $("body").on("click", ".selall", function() {  //tick all check boxes
+    var currtid = $(this).attr('name');
+    $(".series-checkbox-option").prop('name',  function(index, curr) {
+      if (curr == currtid) {
+       event_manager.toggledSeries(curr, $(this).attr("value"), true);
+       $(this).prop("checked", true)
+      }
+    });
+  });
+
+  $("body").on("click", ".deselall", function() {  //clear selection
+    var currtid = $(this).attr('name');
+    $(".series-checkbox-option").prop('name',  function(index, curr) {
+      if (curr == currtid) {
+       event_manager.toggledSeries(curr, $(this).attr("value"), false);
+       $(this).prop("checked", false)
+      }
+    });
   });
 
   $("body").on("change", ".series-checkbox-option", function() {
