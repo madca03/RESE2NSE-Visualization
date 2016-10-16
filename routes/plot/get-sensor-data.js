@@ -1,7 +1,8 @@
 var models = require('../../models/index');
 
 //var nextData_query = "SELECT id,ts,pid,src,tid,sdata FROM sensor_data WHERE id > init_id ORDER BY id ASC LIMIT count";
-var nextData_query_temp = "SELECT sensor_data.* FROM sensor_data JOIN tags WHERE sensor_data.src = tags.src AND tags.tag = \"current_tag\" AND id > init_id ORDER BY id ASC LIMIT count";
+//var nextData_query_temp = "SELECT sensor_data.* FROM sensor_data JOIN tags WHERE sensor_data.src = tags.src AND tags.tag = \"current_tag\" AND id > init_id ORDER BY id ASC LIMIT count";
+var nextData_query_temp = "SELECT sensor_data.*, nodes.label FROM sensor_data JOIN tags, nodes WHERE nodes.mac_address = tags.src AND sensor_data.src = tags.src AND tags.tag = \"current_tag\" AND sensor_data.id > init_id ORDER BY sensor_data.id ASC LIMIT count";
 //var id_query = "SELECT * FROM sensor_data WHERE ts >= \"last_update\" ORDER BY id ASC LIMIT 1";
 var id_query_temp = "SELECT sensor_data.* FROM sensor_data JOIN tags WHERE sensor_data.src = tags.src AND tags.tag = \"current_tag\" AND ts >= \"last_update\" ORDER BY id ASC LIMIT 1";
 var tid_obj = {};
@@ -136,6 +137,7 @@ module.exports = function(req, res, next){
 			ts = resp[i].ts;
 			pid = resp[i].ts;
 			src = parseInt(resp[i].src).toString(16);
+			label = resp[i].label;
 			tid = resp[i].tid;
 			//sdata = resp[i].sdata;
 			if (tid == 0){
@@ -163,11 +165,11 @@ module.exports = function(req, res, next){
 			if (typeof(tid_obj[tid]) == 'undefined')
 				tid_obj[tid] = {};
 
-			if (typeof(tid_obj[tid][src]) == 'undefined')
-				tid_obj[tid][src] = [];
+			if (typeof(tid_obj[tid][label]) == 'undefined')
+				tid_obj[tid][label] = [];
 
-			data_array_length = tid_obj[tid][src].length
-			tid_obj[tid][src][data_array_length] = sensor_data_obj;
+			data_array_length = tid_obj[tid][label].length
+			tid_obj[tid][label][data_array_length] = sensor_data_obj;
 		}
 
 		if (resp.length == count){

@@ -326,7 +326,7 @@ function TIDPlot(tid, placeholder_id, min, max, resolution, title_container) {
           if (curr_dates.length > dates.length) {
             dates = curr_dates;
           }
-          data.push(this.nodes[node].getPlotDict(this.show_legend));
+          data.push(this.nodes[node].getPlotDict(this.show_legend), i);
       }
       ++i;
       this.setPlotTitle(dates);
