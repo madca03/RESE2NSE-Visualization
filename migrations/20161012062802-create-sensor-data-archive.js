@@ -23,6 +23,6 @@ module.exports = {
     });
   },
   down: function(queryInterface, Sequelize) {
-    return queryInterface.dropTable('sensor_data_archives');
+    return queryInterface.dropTable('sensor_data_archive');
   }
 };

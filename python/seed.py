@@ -6,6 +6,8 @@ from seeder.trafficSeeder import trafficSeeder
 from seeder.nodePresentSeeder import nodePresentSeeder
 from seeder.linkPresentSeeder import linkPresentSeeder
 from seeder.sensorDataSeeder import sensorDataSeeder
+from seeder.sensorDataSeeder2 import sensorDataSeeder2
+from seeder.tagsSeeder import tagsSeeder
 
 db_config = {
     'user': 'rese2nse',
@@ -42,9 +44,15 @@ print("Seeding nodes_present table...")
 node_present_seeder = nodePresentSeeder(db_client, node_count_per_floor, floor_count)
 node_present_seeder.seed()
 
+print("Seeding tags table...")
+tagsSeeder(db_client).seed()
+
 print("Seeding sensor_data table...")
 sensorDataSeeder(db_client, node_count_per_floor * floor_count, len(sensor_types)
     , node_present_seeder.created_at).seed()
+
+print("Seeding sensor_data2 table...")
+sensorDataSeeder2(db_client).seed()
 
 print("Seeding links_present table...")
 linkPresentSeeder(db_client, link_count_per_floor,

@@ -4,15 +4,15 @@
 	<% include ./partials/head %>
     <link rel="stylesheet" href="/stylesheets/jquery-ui.min.css" />
     <link rel="stylesheet" href="/stylesheets/plot.css" />
-	
+
   </head>
-  
+
   <body>
     <header>
 		<% include ./partials/header %>
     </header> <!-- end header -->
 	<% include ./partials/nav %>
-	
+
     <div class="main">
       <div class="row">
 	          <div class="small-3 columns">
@@ -66,7 +66,7 @@
         </div> <!-- end .columns -->
 
         <div class="small-9 columns" id = "main-window">
-	  
+
      </div> <!-- end .columns -->
       </div> <!-- end .row -->
     </div> <!-- end .main -->
@@ -189,7 +189,7 @@ function NodeSeries(node_name, max_data_length) {
         //else if (this.data.length == this.max_data_length) {
         //  this.data.shift();
         //}
-    }  
+    }
   };
 
   this.getDates = function() {
@@ -419,7 +419,7 @@ function CheckboxWindow(container, id, name, put_well) {
   this.addButton = function(class_name, value) {
     this.selector.append(
         "<div><input style='margin:10;' class = 'button " + class_name + "' type = 'button' name = '" + this.name + "' value = '" + value + "'></div>");
-  };	
+  };
 }
 
 
@@ -451,7 +451,7 @@ function TIDWindow(container, tid) {
           "<h5>" + tid_names[tid] + "</h5>" +
         "</div>" +
         "<div class = 'callout-body'>" +
-		
+
           "<div class = 'row'>" +
             "<div class = 'small-9 columns center-block'>" +
               "<div class = 'plot-placeholder center-block' style = 'width:650px; height:500px;' id = 'tid-plot" + tid + "'>" +
@@ -460,7 +460,7 @@ function TIDWindow(container, tid) {
               "<p class = 'text-center' id = 'plot-title" + tid + "'>" +
               "</p>" +
             "</div>" +
-			
+
             "<div class = 'small-3 columns'>" +
               "<div class = 'row'>" +
                 "<div class = 'small-12 columns'>" +
@@ -469,9 +469,9 @@ function TIDWindow(container, tid) {
                 "</div>" +
               "</div>" +
             "</div>" +
-			
+
           "</div>" +
-		  	  
+
           "<div class = 'row'>" +
 		              "<div class = 'small-2 columns'>" +
               "<div class = 'center-block' id = 'legend-enable-window" + tid +  "' style = 'width:500px;'>" +
@@ -554,7 +554,7 @@ function WindowEventManager() { // uses windows
 
     setTimeout(fetch, UPDATE_INTERVAL_NO);
   };
-  
+
   this.showLegendChanged = function(tid, checked) {
     windows[tid].tid_plot.setLegendVisibility(checked);
     windows[tid].tid_plot.refreshPlot();
@@ -687,7 +687,7 @@ $(document).ready(function() {
 </script>
 
 
-  
+
 
   </body>
 </html>

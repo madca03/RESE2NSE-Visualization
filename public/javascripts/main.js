@@ -43,10 +43,11 @@ $(window).on("load", function() {
     }
   }, UPDATERATE);
 
-  // setTimeout(function() {
-  //   displayGraph();
-  //   console.log("hello");
-  // }, 3000);
+/*
+  setTimeout(function() {
+     displayGraph();
+   }, 1000);
+*/
 
   /* function is called when the browser is resized */
   // window.onresize = function() {

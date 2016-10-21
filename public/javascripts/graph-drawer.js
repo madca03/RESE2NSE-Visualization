@@ -367,8 +367,6 @@ GraphDrawer.prototype.addNodeDragBehavior = function() {
 
 GraphDrawer.prototype.getSVGStage = function() {
   this.svgStage = d3.select('.graph-container').select('svg');
-  this.svgStage.attr("width", this.width);
-  this.svgStage.attr("height", this.height);
 }
 
 GraphDrawer.prototype.getLinkSelection = function() {
