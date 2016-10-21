@@ -14,6 +14,9 @@ router.get('/api/sensors/:sensor_type_id/archive_index/:archive_date_index', req
 router.get('/api/sensors/:sensor_type_id/archive/:date_archive_id', require('./sensor-archive.js'));
 router.get('/api/archive/date/:date_created_id', require('./graph-archive.js'));
 
+router.get('/get_sensor_data/:multiplier/:group/:resolution', require('../plot/get-sensor-data.js'));
+
+
 router.get('/contour', require('./display-contour.js'));
 
 /* GET home page. */

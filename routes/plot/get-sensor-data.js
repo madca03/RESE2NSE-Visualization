@@ -1,12 +1,20 @@
 var models = require('../../models/index');
 
-//var nextData_query = "SELECT id,ts,pid,src,tid,sdata FROM sensor_data WHERE id > init_id ORDER BY id ASC LIMIT count";
-var nextData_query_temp = "SELECT sensor_data.* FROM sensor_data JOIN tags WHERE sensor_data.src = tags.src AND tags.tag = \"current_tag\" AND id > init_id ORDER BY id ASC LIMIT count";
-//var id_query = "SELECT * FROM sensor_data WHERE ts >= \"last_update\" ORDER BY id ASC LIMIT 1";
-var id_query_temp = "SELECT sensor_data.* FROM sensor_data JOIN tags WHERE sensor_data.src = tags.src AND tags.tag = \"current_tag\" AND ts >= \"last_update\" ORDER BY id ASC LIMIT 1";
+//var nextData_query = "SELECT id,ts,pid,src,tid,sdata FROM sensor_data2 WHERE id > init_id ORDER BY id ASC LIMIT count";
+var nextData_query_temp = "SELECT sensor_data2.* FROM sensor_data2 "
+  + "JOIN tags WHERE sensor_data2.src = tags.src "
+  + "AND tags.tag = \"current_tag\" "
+  + "AND id > init_id "
+  + "ORDER BY id ASC LIMIT count";
+//var id_query = "SELECT * FROM sensor_data2 WHERE ts >= \"last_update\" ORDER BY id ASC LIMIT 1";
+var id_query_temp = "SELECT sensor_data2.* FROM sensor_data2 JOIN tags "
+  + "WHERE sensor_data2.src = tags.src "
+  + "AND tags.tag = \"current_tag\" "
+  + "AND ts >= \"last_update\" "
+  + "ORDER BY id ASC LIMIT 1";
 var tid_obj = {};
 var src_obj = {};
-var sensor_data_obj = {};
+var sensor_data2_obj = {};
 var count = 1000;
 var prev_count = 0;
 var data_array_length;
@@ -43,7 +51,8 @@ module.exports = function(req, res, next){
 
 	id_query = id_query_temp.replace("current_tag", group);
 	nextData_query = nextData_query_temp.replace("current_tag", group);
-	
+
+
 	x = new Date().getTime();
 	x = x + (480*60000);
 	console.log(x + " , " + last);
@@ -60,7 +69,7 @@ module.exports = function(req, res, next){
 					console.log("init_id\[\"10\"\] = " + init_id["10"]);
 				}
 			});
-	
+
 		last_update = x - 3600000;
 		last_update_dt = new Date(last_update).toISOString().slice(0, 19).replace('T', ' ');
 		console.log(last_update_dt);
@@ -71,7 +80,7 @@ module.exports = function(req, res, next){
 					console.log("init_id\[\"1h\"\] = " + init_id["1h"]);
 				}
 			});
-				
+
 		last_update = x - 10800000;
 		last_update_dt = new Date(last_update).toISOString().slice(0, 19).replace('T', ' ');
 		models.sequelize.query(id_query.replace("last_update", last_update_dt), {type: models.sequelize.QueryTypes.SELECT})
@@ -81,7 +90,7 @@ module.exports = function(req, res, next){
 					console.log("init_id\[\"3h\"\] = " + init_id["3h"]);
 				}
 			});
-			
+
 		last_update = x - 21600000;
 		last_update_dt = new Date(last_update).toISOString().slice(0, 19).replace('T', ' ');
 		models.sequelize.query(id_query.replace("last_update", last_update_dt), {type: models.sequelize.QueryTypes.SELECT})
@@ -91,7 +100,7 @@ module.exports = function(req, res, next){
 					console.log("init_id\[\"6h\"\] = " + init_id["6h"]);
 				}
 			});
-				
+
 		last_update = x - 43200000;
 		last_update_dt = new Date(last_update).toISOString().slice(0, 19).replace('T', ' ');
 		models.sequelize.query(id_query.replace("last_update", last_update_dt), {type: models.sequelize.QueryTypes.SELECT})
@@ -101,7 +110,7 @@ module.exports = function(req, res, next){
 					console.log("init_id\[\"12\"\] = " + init_id["12"]);
 				}
 			});
-				
+
 		last_update = x - 86400000;
 		last_update_dt = new Date(last_update).toISOString().slice(0, 19).replace('T', ' ');
 		models.sequelize.query(id_query.replace("last_update", last_update_dt), {type: models.sequelize.QueryTypes.SELECT})
@@ -115,7 +124,11 @@ module.exports = function(req, res, next){
 
 	// retrieves the data from the next row of the database
 	// INSTEAD OF USING THE replace METHOD, USE PLACEHOLDERS FOR THE QUERY
-	models.sequelize.query(nextData_query.replace("init_id", init_id[resolution] + multiplier*count).replace("count", count), {type: models.sequelize.QueryTypes.SELECT})
+	models.sequelize.query(
+    nextData_query.replace("init_id", init_id[resolution] + multiplier*count)
+      .replace("count", count),
+    {type: models.sequelize.QueryTypes.SELECT}
+  )
 	.then(function(resp){
 		// empties the objects used for the data in JSON
 		tid_obj = {};
@@ -156,9 +169,9 @@ module.exports = function(req, res, next){
 			sdata = sdata / 1.0;
 			sdata = sdata.toFixed(2);
 
-			sensor_data_obj = {};
-			sensor_data_obj["ts"] = 1*ts;
-			sensor_data_obj["sdata"] = sdata;
+			sensor_data2_obj = {};
+			sensor_data2_obj["ts"] = 1*ts;
+			sensor_data2_obj["sdata"] = sdata;
 
 			if (typeof(tid_obj[tid]) == 'undefined')
 				tid_obj[tid] = {};
@@ -167,7 +180,7 @@ module.exports = function(req, res, next){
 				tid_obj[tid][src] = [];
 
 			data_array_length = tid_obj[tid][src].length
-			tid_obj[tid][src][data_array_length] = sensor_data_obj;
+			tid_obj[tid][src][data_array_length] = sensor_data2_obj;
 		}
 
 		if (resp.length == count){
@@ -175,7 +188,7 @@ module.exports = function(req, res, next){
 		}else{
 			prev_count = resp.length;
 		}
-		
+
 		json_data = [JSON.stringify(tid_obj)];
 		res.json(JSON.parse(json_data));
 	});

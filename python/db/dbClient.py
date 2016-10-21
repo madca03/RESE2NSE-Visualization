@@ -81,16 +81,13 @@ class dbClient:
         print("Connected to " + self._db_name + " database")
 
     def remove_database_data(self):
+        """Delete all data on each table """
+        
         self.cursor.execute('SHOW TABLES')
         rows = self.cursor.fetchall()
 
-        db_tables = ['datetime_archive', 'floors', 'links_archive',
-            'links_present', 'nodes', 'nodes_archive', 'nodes_present',
-            'sensors', 'traffic', 'configurations']
-
         for (table,) in rows:
-            if table in db_tables:
-                self.remove_table_data(table)
+            self.remove_table_data(table)
 
     def remove_table_data(self, table):
         query = 'DELETE FROM {}'.format(table)

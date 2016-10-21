@@ -9,8 +9,6 @@ router.get('/floor/:floor_number', require('./nodes/nodes-edit.js'));
 
 router.get('/archive/floor/:floor_number/date/:date_created_id', require('./graph/floor-archive.js'));
 
-router.get('/get_sensor_data/:multiplier/:group/:resolution', require('./plot/get-sensor-data.js'));
-
 /* GET home page. */
 router.get('/', function(req, res, next) {
   res.render('index', {title: 'Home'});
