@@ -10,10 +10,33 @@ class sensorDataSeeder:
         self.num_sensors = num_sensors
         self.created_at = created_at
 
+        self.getSensorTypes()
+
+    def getSensorTypes(self):
+        query = "SELECT * FROM sensor_type;"
+
+        try:
+            self.cursor.execute(query)
+        except mysql.connector.Error as err:
+            print("Error: {}".format(err))
+            exit(1)
+
+        self.sensor_types = self.cursor.fetchall()
+
     def seed(self):
         data_count = 1
+        j = 0
+        min = 0
+        max = 0
+        step = 0
 
         for i in range(self.num_nodes):
+            for (id, type, min_t, max_t, step_t) in self.sensor_types:
+                if id == j + 1:
+                    min = min_t
+                    max = max_t
+                    step = step_t
+
             for j in range(self.num_sensors):
                 insert_statement = (""
                     "INSERT INTO sensor_data "
@@ -32,7 +55,7 @@ class sensorDataSeeder:
                     'id': data_count,
                     'node_id': i + 1,
                     'sensor_type_id': j + 1,
-                    'value': random.uniform(1,1000),
+                    'value': random.uniform(min,max),
                     'created_at': self.created_at
                 }
 

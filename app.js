@@ -40,7 +40,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 // =======
 app.use('/', graph);
 app.use('/nodes', nodes);
-// app.use('/', routes);
+app.use('/', routes);
 // app.use('/graph', graph);
 // app.use('/', nodes);
 app.use('/plot', plot);

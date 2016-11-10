@@ -29,6 +29,7 @@ $(window).on("load", function() {
   ui.init();
   slider.init(dataFetcher, graph, graphDrawer);
   graphDrawer.setDimensions(ui.svgWidth, ui.svgHeight);
+  graphDrawer.setSensorTypeArray();
   graphDrawer.initSVGStage();
 
   dataFetcher.setWidth(ui.svgWidth);
@@ -69,11 +70,11 @@ $(window).on("load", function() {
 
     if ($(this).val() !== "Network") {
       displayGraphForSensorData(sensor_type);
-      display_timer = setInterval(function() {
-        if (!dataFetcher.updateDisabled) {
-          displayGraphForSensorData(sensor_type);
-        }
-      }, UPDATERATE2);
+      // display_timer = setInterval(function() {
+      //   if (!dataFetcher.updateDisabled) {
+      //     displayGraphForSensorData(sensor_type);
+      //   }
+      // }, UPDATERATE2);
     } else {
       displayGraph();
       display_timer = setInterval(function() {

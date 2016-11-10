@@ -1,0 +1,47 @@
+.settings-main {
+  margin-top: 35px;
+}
+
+.settings-group {
+  list-style: none;
+  margin: 0;
+  padding: 0 20px;
+}
+
+.settings-group > li {
+  cursor: pointer;
+  border: none;
+  border-radius: 2px;
+  height: 36px;
+  line-height: 36px;
+  text-transform: uppercase;
+  box-shadow: 0 2px 2px 0 rgba(0,0,0,0.14),
+    0 1px 5px 0 rgba(0,0,0,0.12),
+    0 3px 1px -2px rgba(0,0,0,0.2)
+}
+
+.settings-group > li {
+  outline: 0;
+  margin-bottom: 12px;
+  padding: 0 2rem;
+}
+
+.settings-group > li {
+  transition: .3s ease-out
+}
+
+.settings-group > li {
+  text-decoration: none;
+  background-color: #26a69a;
+  color: #fff;
+  text-align: center;
+  letter-spacing: .5px;
+
+}
+
+.settings-group > li:hover {
+  background-color: #2bbbad;
+  box-shadow: 0 3px 3px 0 rgba(0,0,0,0.14),
+    0 1px 7px 0 rgba(0,0,0,0.12),
+    0 3px 1px -1px rgba(0,0,0,0.2);
+}

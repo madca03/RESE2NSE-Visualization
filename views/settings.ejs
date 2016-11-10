@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html class="no-js" lang="en">
+  <head>
+	  <% include ./partials/head %>
+    <link rel="stylesheet" href="/stylesheets/jquery-ui.min.css" />
+    <link rel="stylesheet" href="/stylesheets/graph.css" />
+    <link rel="stylesheet" href="/stylesheets/settings.css" />
+    <script src="/javascripts/scripts.min.js"></script>
+  </head>
+
+  <body>
+    <header><% include ./partials/header %></header> <!-- end header -->
+	  <% include ./partials/nav %>
+
+    <div class="settings-main" ng-app="app" ng-controller="SettingsController">
+      <div class="row">
+        <div class="small-3 columns">
+          <ul class="settings-group">
+            <li class="settings-type">
+              <span>Sensors</span>
+            </li>
+            <li class="settings-type">
+              <span>Network</span>
+            </li>
+          </ul>
+        </div>
+
+        <div class="small-9 columns">
+          <div class="row">
+            <div class="small-12 columns">
+              <select ng-options="sensorType.type for sensorType in sensorTypes"
+                ng-model="selected">
+              </select>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="small-4 columns">
+              <label>Min value
+                <input type="text" placeholder="Minimum value" ng-model="minVal">
+              </label>
+            </div>
+            <div class="small-4 columns">
+              <label>Max value
+                <input type="text" placeholder="Maximum value" ng-model="maxVal">
+              </label>
+            </div>
+            <div class="small-4 columns">
+              <label>Step
+                <input type="text" placeholder="Step size" ng-model="stepVal">
+              </label>
+            </div>
+          </div>
+
+          <div class="row">
+            <button type="button" class="success button" ng-click="updateSensorType()">Save</button>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

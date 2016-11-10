@@ -41,6 +41,23 @@ GraphDrawer.prototype.setSensorType = function(sensor_type) {
   this.sensor_type = sensor_type;
 };
 
+GraphDrawer.prototype.setSensorTypeArray = function() {
+  var request = $.ajax({
+    url: BASEURL + "/api/sensors",
+    type: 'GET',
+    dataType: 'json',
+    context: this
+  });
+
+  request.done(function(res, textStatus, jqXHR) {
+    this.sensor_type_array = res.data.sensor_types;
+    console.log(this.sensor_type_array);
+  });
+};
+
+/**
+ * this.graph_type can be "Sensor" or "Network"
+ */
 GraphDrawer.prototype.setGraphType = function(graph_type) {
   this.graph_type = graph_type;
 };
@@ -207,11 +224,11 @@ GraphDrawer.prototype.createNodeCircle = function() {
   }
 }
 
-GraphDrawer.prototype.setNodeColor = function(nodeCircle) {
+GraphDrawer.prototype.setNodeColor = function(nodeCircles) {
   if (this.graph_type === "Network") {
-    this.setNodeColorForNetwork(nodeCircle);
+    this.setNodeColorForNetwork(nodeCircles);
   } else if (this.graph_type === "Sensor") {
-    this.setNodeColorForSensorData(nodeCircle);
+    this.setNodeColorForSensorData(nodeCircles);
   }
 };
 
@@ -316,7 +333,7 @@ GraphDrawer.prototype.getNodeDragBehavior = function() {
     d.px += d3.event.dx;
     d.py += d3.event.dy;
     d.x += d3.event.dx;
-    d.y += d3.event.dy;
+    d.y += d3.event.dy;createNodeCircle =
     tick(); // this is the key to make it work together with updating both px,py,x,y on d !
   }
 
@@ -602,6 +619,23 @@ GraphDrawer.prototype.setNodeColorForSensorData = function(nodeCircle) {
   var colorLight = null;
   var colorDark = null;
 
+  var colorLength = null;
+  var sensor_type_obj = {};
+
+  // Todo: use lodash here
+  for (var i = 0; i < this.sensor_type_array.length; i++) {
+    if (this.sensor_type_array[i].id === Number(sensor_type)) {
+      sensor_type_obj = this.sensor_type_array[i];
+      break;
+    }
+  }
+
+  // ceil((max - min) / step) + 1
+  colorLength = Math.ceil((sensor_type_obj.max - sensor_type_obj.min) / sensor_type_obj.step);
+
+  console.log('colorlength = ' + colorLength);
+  console.log(sensor_type_obj);
+
   switch (sensor_type) {
     case '1': // Humidity
       colorLight = "#d5f5ff";
@@ -621,27 +655,41 @@ GraphDrawer.prototype.setNodeColorForSensorData = function(nodeCircle) {
       break;
   }
 
-  var color = d3.scale.linear().domain([1, this.nodes_length])
+  var color = d3.scale.linear().domain([1, colorLength])
     .interpolate(d3.interpolateHcl)
     .range([d3.rgb(colorLight), d3.rgb(colorDark)]);
+
+  var getColorIndex = function(sensor_value) {
+    var i = 0;
+    console.log(sensor_value);
+    console.log(sensor_type_obj.min);
+    console.log(sensor_type_obj.max);
+    // console.lo
+
+    for (var i = 0; i < colorLength; i++) {
+      console.log('i = ' + i + ' left = ' + (sensor_type_obj.min + (sensor_type_obj.step * i)) );
+      console.log('i = ' + i + ' right = ' + (sensor_type_obj.min + (sensor_type_obj.step * (i + 1))) );
+      if ( (sensor_value >= sensor_type_obj.min + (sensor_type_obj.step * i)) &&
+           (sensor_value < sensor_type_obj.min + (sensor_type_obj.step * (i + 1))) ) {
+        return i;
+      }
+    }
+  };
 
   var i = 0;
   /* iterate over all SVG node circles */
   nodeCircle.each(function(d) {
     var circle = d3.select(this);
+    var sensor_value = circle.datum().value;
 
     circle.attr("fill", function(d) {
-      return color(i);
+      return color(getColorIndex(sensor_value));
     });
 
     i++;
   });
-  // nodeCircle.attr("fill", function(d) {
-  //   // return color(i);
-  //   i++;
-  //   console.log(i);
-  // });
 }
+
 
 GraphDrawer.prototype.setNodeColorForNetwork = function(nodeCircle) {
   nodeCircle.attr("fill", function(d) {
