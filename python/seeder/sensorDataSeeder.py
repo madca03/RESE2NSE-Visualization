@@ -24,7 +24,6 @@ class sensorDataSeeder:
         self.sensor_types = self.cursor.fetchall()
 
     def seed(self):
-        data_count = 1
         j = 0
         min = 0
         max = 0
@@ -40,26 +39,22 @@ class sensorDataSeeder:
             for j in range(self.num_sensors):
                 insert_statement = (""
                     "INSERT INTO sensor_data "
-                    "(id, "
-                    "node_id, "
+                    "(node_id, "
                     "sensor_type_id, "
                     "value, "
                     "created_at) "
-                    "VALUES (%(id)s, "
-                    "%(node_id)s, "
+                    "VALUES "
+                    "(%(node_id)s, "
                     "%(sensor_type_id)s, "
                     "%(value)s, "
                     "%(created_at)s);")
 
                 data = {
-                    'id': data_count,
                     'node_id': i + 1,
                     'sensor_type_id': j + 1,
                     'value': random.uniform(min,max),
                     'created_at': self.created_at
                 }
-
-                data_count += 1
 
                 try:
                     self.cursor.execute(insert_statement, data)

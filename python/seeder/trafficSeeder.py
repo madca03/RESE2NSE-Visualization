@@ -4,10 +4,10 @@ class trafficSeeder:
     def __init__(self, db_client, traffic_status):
         self.db_client = db_client
         self.cursor = db_client.cursor
-        self._traffic_status = traffic_status
+        self.traffic_status = traffic_status
 
     def seed(self):
-        for index, status in enumerate(self._traffic_status):
+        for index, status in enumerate(self.traffic_status):
             insert_statement = (""
                 "INSERT INTO traffic "
                 "(id, status) "

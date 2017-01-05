@@ -51,7 +51,6 @@ GraphDrawer.prototype.setSensorTypeArray = function() {
 
   request.done(function(res, textStatus, jqXHR) {
     this.sensor_type_array = res.data.sensor_types;
-    console.log(this.sensor_type_array);
   });
 };
 
@@ -236,14 +235,15 @@ GraphDrawer.prototype.updateGraphDisplay = function() {
   // This block is for normal graph update
   this.getSVGStage();
   this.removeSVGLinks();
-  this.removeSVGNodes();
+  // this.removeSVGNodes();
+  this.updateNodeCircleDataProperty();
 
   this.getNodeSelection();
   this.getLinkSelection();
 
   // this.scaleNodePosition();
   this.createSVGLinks();
-  this.createSVGNodes();
+  // this.createSVGNodes();
 
   // // if (this.updateJustEnabled) {
   //   this.removeSVGNodes();
@@ -252,11 +252,27 @@ GraphDrawer.prototype.updateGraphDisplay = function() {
   // // }
 }
 
-// GraphDrawer.prototype.removeExcessTooltip = function() {
-//   $('.qtip').each(function(index) {
-//     if ($(this).attr("cla"))
-//   });
-// };
+GraphDrawer.prototype.updateNodeCircleDataProperty = function() {
+  var thisObj = this;
+  $('g.node circle').each(function() {
+    var node = _.find(thisObj.nodes, {'id': $(this).prop('__data__').id});
+    var data = $(this).prop('__data__');
+
+    if ($('.qtip-focus').length &&
+      ($('.qtip-focus').qtip().id === $(this).qtip().id) ) {
+
+      $('.qtip-focus').find('.tooltip-transmission').text('Last Transmission: ' + node.last_transmission);
+      $('.qtip-focus').find('.tooltip-packets-sent').text('Packets Sent: ' + node.packets_sent);
+      $('.qtip-focus').find('.tooltip-packets-received').text('Packets Received: ' + node.packets_received);
+    }
+
+    data.last_transmission = node.last_transmission;
+    data.packets_sent = node.packets_sent;
+    data.packets_received = node.packets_received;
+
+    $(this).prop('__data__', data);
+  });
+}
 
 GraphDrawer.prototype.updateArchiveGraphDisplay = function() {
   // This block is for updating the graph display for archive graph dataset
@@ -333,7 +349,7 @@ GraphDrawer.prototype.getNodeDragBehavior = function() {
     d.px += d3.event.dx;
     d.py += d3.event.dy;
     d.x += d3.event.dx;
-    d.y += d3.event.dy;createNodeCircle =
+    d.y += d3.event.dy;
     tick(); // this is the key to make it work together with updating both px,py,x,y on d !
   }
 
@@ -564,7 +580,10 @@ GraphDrawer.prototype.setLinkStrokeWidth = function()  {
 GraphDrawer.prototype.createSVGNodes = function() {
   this.nodeSelection.enter()
     .append("g")
-    .attr("class", "node");
+    .attr("class", "node")
+    .attr("data-id", function(d) {
+      return d.id;
+    });
 
   this.createNodeCircle();
   this.createNodeLabel();
@@ -741,10 +760,10 @@ GraphDrawer.prototype.createTooltip = function() {
 
 GraphDrawer.prototype.tooltipContents = function(node_data) {
   var html = ""
-    + "<div class='tooltip-row'>Mac Address: " + node_data.mac_address + "</div>"
-    + "<div class='tooltip-row'>Last Transmission: " + node_data.last_transmission + "</div>"
-    + "<div class='tooltip-row'>Packets Sent: " + node_data.packets_sent + "</div>"
-    + "<div class='tooltip-row'>Packets Received: " + node_data.packets_received + "</div>";
+    + "<div class='tooltip-row tooltip-mac'>Mac Address: " + node_data.mac_address + "</div>"
+    + "<div class='tooltip-row tooltip-transmission'>Last Transmission: " + node_data.last_transmission + "</div>"
+    + "<div class='tooltip-row tooltip-packets-sent'>Packets Sent: " + node_data.packets_sent + "</div>"
+    + "<div class='tooltip-row tooltip-packets-received'>Packets Received: " + node_data.packets_received + "</div>";
   return html;
 }
 

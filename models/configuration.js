@@ -1,6 +1,6 @@
 'use strict';
 module.exports = function(sequelize, DataTypes) {
-  var Configuration = sequelize.define('Configuration', {
+  var Configuration = sequelize.define('configurations', {
     id: {
       allowNull: false,
       autoIncrement: true,

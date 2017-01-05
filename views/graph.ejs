@@ -18,16 +18,16 @@
               <ul>
                 <li><span class="nav-side-heading">EEE FLOOR PLAN</span><li>
 
-                <% for (var i = 0; i < floorCount; i++) { %>
-                  <% var floorNumber = i + 1 %>
+                <%# for (var i = 0; i < floorCount; i++) { %>
+                  <%# var floorNumber = i + 1 %>
 
-                  <li><span class="floor-link" data-floor-number=<%= floorNumber %>>Floor <%= floorNumber %></span></li>
-                <% } %>
+                  <!-- <li><span class="floor-link" data-floor-number=<%#= floorNumber %>>Floor <%#= floorNumber %></span></li> -->
+                <%# } %>
 
               </ul>
-            </div> <!-- end .floor-links -->
-          </div> <!-- end .nav-side -->
-        </div> <!-- end .columns -->
+            </div>
+          </div>
+        </div>
 
         <!-- Graph Display -->
         <div class="small-9 columns">
@@ -84,6 +84,7 @@
   <script src="/javascripts/foundation.min.js"></script>
   <script src="/javascripts/d3.v3.min.js"></script>
   <script src="/javascripts/jquery.qtip.min.js"></script>
+  <script src="/javascripts/lodash.js"></script>
 
   <script src="/javascripts/ui.js"></script>
   <script src="/javascripts/data-fetcher.js"></script>

@@ -1,21 +1,25 @@
 'use strict';
 module.exports = function(sequelize, DataTypes) {
-  var sensor_data = sequelize.define('sensor_data', {
-    ts: DataTypes.DATE,
-    pid: DataTypes.INTEGER,
-    src: DataTypes.STRING,
-    tid: DataTypes.STRING,
-    sdata: DataTypes.INTEGER,
-    node_id: DataTypes.INTEGER,
-    sensor_type_id: DataTypes.INTEGER,
-    value: DataTypes.DOUBLE
+  var SensorData= sequelize.define('sensor_data', {
+    node_id: {
+      type: DataTypes.INTEGER
+    },
+    sensor_type_id: {
+      type: DataTypes.INTEGER
+    },
+    value: {
+      type: DataTypes.DOUBLE
+    },
+    created_at: {
+      allowNull: false,
+      type: DataTypes.DATE
+    }
   }, {
-    timestamp: false,
     classMethods: {
       associate: function(models) {
         // associations can be defined here
       }
     }
   });
-  return sensor_data;
+  return SensorData;
 };

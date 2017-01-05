@@ -79,8 +79,12 @@ EventHandler.prototype.updateNodes = function(updatedNodes) {
     dataType: 'json'
   });
 
-  request.done(function(_data) {
-    location.reload();
+  request.done(function(data) {
+    if (data.status == 'ok') {
+      location.reload();
+    } else {
+      console.log(data.error);
+    }
   });
 }
 

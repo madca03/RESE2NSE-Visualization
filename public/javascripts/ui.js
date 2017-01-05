@@ -17,6 +17,13 @@ UI.prototype.init = function() {
 }
 
 /**
+  * remove unused tooltips
+  */
+UI.prototype.removeOldTooltips = function() {
+  $('.qtip').not('.qtip-focus').remove();
+}
+
+/**
  * This function sets the dimensions of the floor image to match
  * the width and height dimensions of its parent element, .graph-container
  */
@@ -24,8 +31,6 @@ UI.prototype.setFloorImageDimensions = function() {
   /* SVG stage and floorplan image properties */
   var graph_container = $(".graph-container");
   var floor_img = $(".floor-img");
-
-
 
   /* don't use the height of the div.graph-container, use the height of the
   image instead */

@@ -19,8 +19,8 @@ var dummy;
 // http://stackoverflow.com/questions/544993/official-way-to-ask-jquery-wait-for-all-images-to-load-before-executing-somethin
 /* wait for all images to load */
 $(window).on("load", function() {
-  var graph = new Graph();
   var ui = new UI();
+  var graph = new Graph();
   var dataFetcher = new DataFetcher();
   var slider = new Slider();
   var eventHandler = new EventHandler();
@@ -156,6 +156,7 @@ $(window).on("load", function() {
       /* if graph display if just for update */
       if (graphDrawer.graphDisplayed) {
         graphDrawer.updateGraphDisplay();
+        // ui.removeOldTooltips();
       }
       /* if it's the first time to display the graph */
       else {
@@ -203,7 +204,8 @@ $(window).on("load", function() {
         modifiedNodes.push({
           'id': nodes[i].id,
           'x_coordinate': nodes[i].x,
-          'y_coordinate': nodes[i].y
+          'y_coordinate': nodes[i].y,
+          'coordinate_set': nodes[i].coordinate_set
         });
       }
     }

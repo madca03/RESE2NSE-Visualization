@@ -1,6 +1,5 @@
 from db.dbClient import dbClient
-from db.dbArchive import archiveManager
-from db.dbTable import tableManager
+from db.dbDataGenerator import dbDataGenerator
 from time import sleep
 import sys
 import signal
@@ -9,7 +8,6 @@ def handler(signum, frame):
     db_client.close_connection()
     print("Exiting...")
     sys.exit(0)
-
 
 signal.signal(signal.SIGINT, handler)
 
@@ -23,17 +21,13 @@ db_client = dbClient(db_config)
 db_client.start_connection()
 db_client.use_database('graph')
 
-sleep_time = 2
+sleep_time = 1
 
-archive_manager = archiveManager(db_client)
-table_manager = tableManager(db_client)
+# archive_manager = archiveManager(db_client)
+data_generator = dbDataGenerator(db_client)
 
 while True:
-    print("Archiving nodes and adding new links")
-    archive_manager.archive_database()
-
     print('Generating new random data')
-    table_manager.generate_random_data()
+    data_generator.generate_random_data()
 
-    # pause for T seconds
     sleep(sleep_time)
