@@ -7,8 +7,8 @@
     "setupdb": "npm run migratedb && npm run seeddb",
     "migratedb": "sequelize db:migrate",
     "undomigratedb": "sequelize db:migrate:undo:all",
-    "seeddb": "python3 python/seed.py",
-    "archivedb": "python3 python/archive.py"
+    "seeddb": "python python/seed.py",
+    "archivedb": "python python/archive.py"
   },
   "dependencies": {
     "binascii": "0.0.1",
