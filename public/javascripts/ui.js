@@ -16,6 +16,10 @@ UI.prototype.init = function() {
   this.setNavbars();
 }
 
+UI.prototype.removeOldTooltips = function() {
+  $('.qtip').not('.qtip-focus').remove();
+}
+
 /**
  * This function sets the dimensions of the floor image to match
  * the width and height dimensions of its parent element, .graph-container

@@ -155,6 +155,7 @@ $(window).on("load", function() {
       /* if graph display if just for update */
       if (graphDrawer.graphDisplayed) {
         graphDrawer.updateGraphDisplay();
+        ui.removeOldTooltips();
       }
       /* if it's the first time to display the graph */
       else {
