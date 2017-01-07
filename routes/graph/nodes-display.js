@@ -31,7 +31,7 @@ module.exports =  function(req, res, next) {
       + 'FROM nodes_data GROUP BY node_id) '
       + 'AS q ON nodes_data.node_id = q.node_id '
       + 'AND nodes_data.created_at = q.created_at '
-    + 'AND nodes_info.coordinate_set = true'
+    + 'WHERE nodes_info.coordinate_set = true'
     + ';';
 
   var links_query = ''
@@ -53,59 +53,64 @@ module.exports =  function(req, res, next) {
   var date_archive_query = ''
     + 'SELECT DISTINCT(created_at) '
     + 'AS datetime_archive '
-    + 'FROM links'
+    + 'FROM links '
+    + "WHERE created_at > '" + req.params.archive_date.replace('T', ' ') + "'"
     + ';';
 
-  Promise.all([
-    models.sequelize.query(nodes_query, {
-      type: models.sequelize.QueryTypes.SELECT
-    }),
     models.sequelize.query(links_query, {
       type: models.sequelize.QueryTypes.SELECT
-    }),
-    models.sequelize.query(date_archive_query, {
-      type: models.sequelize.QueryTypes.SELECT
-    })
-  ]).then(function(values) {
-    var nodes = values[0];
-    var links = values[1];
-    var date_archive = values[2];
+    }).then(function(nodes) {
+      res.send(nodes);
+      // models.sequelize.query(links_query, {
+      //   type: models.sequelize.QueryTypes.SELECT
+      // }).then(function(links) {
+        // models.sequelize.query(date_archive_query, {
+        //   type: models.sequelize.QueryTypes.SELECT
+        // }).then(function(date_archive) {
+        //   var response = {
+        //     'status': 'ok',
+        //     'data': {
+        //       'graph': {
+        //         'nodes': nodes,
+        //         'links': links,
+        //         'date_archive': date_archive,
+        //         'date_archive_count': date_archive.length
+        //       }
+        //     }
+        //   };
+        //
+        //   res.json(response);
+        // });
+      // });
+    });
 
-    var response = {
-      'status': 'ok',
-      'data': {
-        'graph': {
-          'nodes': nodes,
-          'links': links,
-          'date_archive': date_archive,
-          'date_archive_count': date_archive.length
-        }
-      }
-    };
-
-    res.json(response);
-  });
-
-  // models.sequelize.query(node_query, { type: models.sequelize.QueryTypes.SELECT })  // Query the nodes
-  //   .then(function(nodes) {
-  //     models.sequelize.query(link_query, { type: models.sequelize.QueryTypes.SELECT })  // Query the edges
-  //       .then(function(links) {
-  //         models.sequelize.query(archive_date_query, { type: models.sequelize.QueryTypes.SELECT }) // Query the archive_count
-  //           .then(function(date_archive) {
-  //             var response = {
-  //               'status': 'ok',
-  //               'data' : {
-  //                 'graph': {
-  //                   'nodes': nodes,
-  //                   'links': links,
-  //                 },
-  //                 'date_archive': date_archive,
-  //                 'date_archive_count': date_archive.length,
-  //               }
-  //             }
+  // Promise.all([
+  //   models.sequelize.query(nodes_query, {
+  //     type: models.sequelize.QueryTypes.SELECT
+  //   }),
+  //   models.sequelize.query(links_query, {
+  //     type: models.sequelize.QueryTypes.SELECT
+  //   }),
+  //   models.sequelize.query(date_archive_query, {
+  //     type: models.sequelize.QueryTypes.SELECT
+  //   })
+  // ]).then(function(values) {
+  //   var nodes = values[0];
+  //   var links = values[1];
+  //   var date_archive = values[2];
   //
-  //             res.json(response);  // send graph data as JSON
-  //           });
-  //       });
-  //   });
+  //   var response = {
+  //     'status': 'ok',
+  //     'data': {
+  //       'graph': {
+  //         'nodes': nodes,
+  //         'links': links,
+  //         'date_archive': date_archive,
+  //         'date_archive_count': date_archive.length
+  //       }
+  //     }
+  //   };
+  //
+  //   res.json(response);
+  // });
 }

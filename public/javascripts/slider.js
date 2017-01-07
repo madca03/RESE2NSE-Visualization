@@ -57,10 +57,14 @@ Slider.prototype.init = function(dataFetcher, graph, graphDrawer) {
 
           if (graphDrawer.graph_type === "Network") {
             dataFetcher.getArchiveDataForDisplay(
-              graph.archiveDate[ui.value - 1].id);
+              graph.archiveDate[ui.value - 1].datetime_archive.slice(0,19), function(data) {
+                graphDrawer.setGraphType("Network");
+                graphDrawer.setGraph(data);
+                graphDrawer.updateArchiveGraphDisplay();
+              });
           } else if (graphDrawer.graph_type === "Sensor") {
             dataFetcher.getSensorDataArchive(graphDrawer.sensor_type,
-              graph.archiveDate[ui.value - 1].id, function(data) {
+              graph.archiveDate[ui.value - 1].datetime_archive, function(data) {
                 graphDrawer.setNodes(data.nodes, data.nodes_length);
                 graphDrawer.updateGraphDisplayForSensorData();
               });
@@ -71,6 +75,14 @@ Slider.prototype.init = function(dataFetcher, graph, graphDrawer) {
         }
       }
   });
+}
+
+Slider.prototype.disabled = function() {
+  return !($('.slider-range').slider('option', 'disabled'));
+}
+
+Slider.prototype.enable = function() {
+  $('.slider-range').slider('option', 'disabled', false);
 }
 
 Slider.prototype.changeTimeDisplay = function(datetime) {

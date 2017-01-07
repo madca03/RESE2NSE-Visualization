@@ -15,6 +15,7 @@ const UPDATERATE2 = 500;
 /*************  Application starts here  *************/
 
 var dummy;
+var dummy2;
 
 // http://stackoverflow.com/questions/544993/official-way-to-ask-jquery-wait-for-all-images-to-load-before-executing-somethin
 /* wait for all images to load */
@@ -156,7 +157,7 @@ $(window).on("load", function() {
       /* if graph display if just for update */
       if (graphDrawer.graphDisplayed) {
         graphDrawer.updateGraphDisplay();
-        // ui.removeOldTooltips();
+        ui.removeOldTooltips();
       }
       /* if it's the first time to display the graph */
       else {
@@ -168,13 +169,20 @@ $(window).on("load", function() {
         add the old archiveDate length to the number of new archiveDate
       */
 
-      /* update the array of archive dates */
-      // http://stackoverflow.com/questions/1374126/how-to-extend-an-existing-javascript-array-with-another-array-without-creating
-      slider.storeArchiveDate(graph.archiveDate, data.date_archive);
-      slider.updateSliderRange(graph.archiveDate.length);
-      slider.updateArchiveDate(graph.archiveDate);
+      if (data.graph.date_archive_count) {
+        if (slider.disabled()) slider.enable();
+
+        /* update the array of archive dates */
+        // http://stackoverflow.com/questions/1374126/how-to-extend-an-existing-javascript-array-with-another-array-without-creating
+        slider.storeArchiveDate(graph.archiveDate, data.graph.date_archive);
+        slider.updateSliderRange(graph.archiveDate.length);
+        slider.updateArchiveDate(graph.archiveDate);
+      }
     });
   }
+
+  // dummy = displayGraph;
+  // dummy2 = graph;
 
   function displayGraphForEdit() {
     dataFetcher.getDataForEdit(function(data) {

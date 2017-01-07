@@ -116,17 +116,19 @@ DataFetcher.prototype.getDataForEdit = function(callback) {
 
 DataFetcher.prototype.getDataForDisplay = function(archiveDate, callback) {
   var dateId;
-  if (archiveDate.length === 0) {
-    /* query all of the archives */
-    dateId = 0;
-  } else {
+  var url;
+
+  if (archiveDate.length) {
     /* if archiveDate is not empty, get the id of the last archiveDate */
-    dateId = archiveDate[archiveDate.length - 1].id;
+    date_archive = archiveDate[archiveDate.length - 1].datetime_archive.slice(0,19);
+    url = BASEURL + "/nodes/display/" + date_archive;
+  } else {
+    url = BASEURL + "/nodes/display/" + 0;
   }
 
   /* ajax call for guest users */
   var request = $.ajax({
-    url: BASEURL + "/nodes/display/" + dateId,
+    url: url,
     type: "GET",
     dataType: "json",
 
@@ -273,9 +275,9 @@ DataFetcher.prototype.getGraphPerFloor = function(graphData) {
  * @param {Number} floorNumber: the floor to be updated with the archive graph data.
  * @param {Number} dateArchiveID: the ID of the archive date in the database.
  */
-DataFetcher.prototype.getArchiveDataForDisplay = function(dateArchiveID) {
+DataFetcher.prototype.getArchiveDataForDisplay = function(datetime_archive, callback) {
   var request = $.ajax({
-    url: BASEURL + "/api/archive/date/" + dateArchiveID,
+    url: BASEURL + "/api/archive/date/" + datetime_archive,
     type: "GET",
     dataType: "json",
     context: this
@@ -285,24 +287,11 @@ DataFetcher.prototype.getArchiveDataForDisplay = function(dateArchiveID) {
     this.modifyNodesForDisplay(_data.data.graph.nodes);
     this.modifyLinks(_data.data.graph);
 
-    var graphDrawer = new GraphDrawer();
-    graphDrawer.setGraphType("Network");
-    graphDrawer.setGraph(_data.data.graph);
-    graphDrawer.updateArchiveGraphDisplay();
-
-    // // find the Floor object which should be updated with the archive graph data
-    // for (var i = 0; i < this.floors.length; i++) {
-    //   if (this.floors[i].floorNumber === floorNumber) {
-    //     this.modifyNodesForDisplay(nodes);
-    //
-    //     this.floors[i].nodes = nodes;
-    //     this.floors[i].links = this.modifyLinks(nodes, links);
-    //     // update the graph display
-    //     var singleGraphDrawer = new SingleGraphDrawer(this.floors[i]);
-    //     singleGraphDrawer.updateArchiveGraphDisplay();
-    //     break;
-    //   }
-    // }
+    callback(_data.data.graph);
+    // var graphDrawer = new GraphDrawer();
+    // graphDrawer.setGraphType("Network");
+    // graphDrawer.setGraph(_data.data.graph);
+    // graphDrawer.updateArchiveGraphDisplay();
   });
 }
 
