@@ -227,7 +227,7 @@ GraphDrawer.prototype.updateGraphDisplay = function() {
 
   // this.scaleNodePosition();
   this.createSVGLinks();
-  this.createSVGNodes();
+  // this.createSVGNodes();
 
   // // if (this.updateJustEnabled) {
   //   this.removeSVGNodes();
