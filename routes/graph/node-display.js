@@ -5,7 +5,6 @@ module.exports = function(req, res, next) {
     + 'SELECT '
       + 'nodes.label, '
       + 'nodes.mac_address, '
-      + 'nodes.floor_id, '
       + 'nodes_present.x_coordinate, '
       + 'nodes_present.y_coordinate, '
       + 'nodes_present.last_transmission, '

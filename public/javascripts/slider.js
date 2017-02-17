@@ -13,6 +13,9 @@ function Slider() {
   */
   this.initialDisplay = true;
   this.currentFocusTime = null;
+  this.archiveId = 0;
+  this.graphType = null;
+  this.inArchive = false;
 }
 
 /**
@@ -20,7 +23,7 @@ function Slider() {
  * event that is used to change the displayed time and the "stop" event
  * that is used to change the display to show an archive data.
  */
-Slider.prototype.init = function(dataFetcher, graph, graphDrawer) {
+Slider.prototype.init = function(dataFetcher, graph, graphDrawer, displayGraphOption) {
   var thisObj = this;
 
   $('.slider-range').slider({
@@ -44,7 +47,18 @@ Slider.prototype.init = function(dataFetcher, graph, graphDrawer) {
           "this" points to the slider
         */
         var max = $(this).slider('option','max');
-        if (ui.value != max) {
+
+        if (ui.value === max) {
+          thisObj.inArchive = false;
+          dataFetcher.updateDisabled = false;
+          displayGraphOption();
+        } else {
+          thisObj.inArchive = true;
+          thisObj.archiveId = ui.value;
+          thisObj.graphType = {
+            type: graphDrawer.graph_type
+          };
+
 
           /* Set the updateDisabled to true so that the continuously running
             function in graph.js that updates the graph will not execute.
@@ -57,17 +71,21 @@ Slider.prototype.init = function(dataFetcher, graph, graphDrawer) {
 
           if (graphDrawer.graph_type === "Network") {
             dataFetcher.getArchiveDataForDisplay(
-              graph.archiveDate[ui.value - 1].id);
+              graph.archiveDate[ui.value - 1].id, function(data) {
+                graphDrawer.setGraphType("Network");
+                graphDrawer.setGraph(data);
+                graphDrawer.drawGraphDisplay();
+              });
           } else if (graphDrawer.graph_type === "Sensor") {
-            dataFetcher.getSensorDataArchive(graphDrawer.sensor_type,
+            thisObj.id = graphDrawer.sensor_type.id;
+
+            dataFetcher.getSensorDataArchive(graphDrawer.sensor_type.id,
               graph.archiveDate[ui.value - 1].id, function(data) {
                 graphDrawer.setNodes(data.nodes, data.nodes_length);
                 graphDrawer.updateGraphDisplayForSensorData();
               });
           }
 
-        } else {
-          dataFetcher.updateDisabled = false;
         }
       }
   });
@@ -99,7 +117,7 @@ Slider.prototype.storeArchiveDate = function(archiveDate, newArchive) {
   */
   if (range_val !== "all_all") {
     for (var i = 0; i < newArchive.length; i++) {
-      archiveDate.pop();
+      archiveDate.shift();
     }
 
     archiveDate.push.apply(archiveDate, newArchive);
@@ -111,12 +129,7 @@ Slider.prototype.storeArchiveDate = function(archiveDate, newArchive) {
   }
 }
 
-Slider.prototype.adjustSlider = function(archiveDate, newArchive, range_str) {
-  this.adjustSliderRange(archiveDate, newArchive);
-  // this.adjustSliderHandlePosition(range_str);
-}
-
-Slider.prototype.adjustSliderHandlePosition = function(range_str, archiveDate) {
+Slider.prototype.adjustSliderHandlePosition = function(range_str, archiveDate, dataFetcher, graphDrawer) {
   var new_range = this.range_value_enum[range_str];
   var slider_min = $('.slider-range').slider('option', 'min');
   var slider_val = $('.slider-range').slider('option', 'value');
@@ -139,7 +152,6 @@ Slider.prototype.adjustSliderHandlePosition = function(range_str, archiveDate) {
   if (slider_val !== slider_max) {
     /* if the user is changing from higher range to a lower range */
     if (new_range.val < this.current_range.val) {
-      // console.log("new < current");
       var firstDate = new Date(archiveDate[0].datetime_archive);
 
       /* if ---x----------- <- current range
@@ -148,6 +160,13 @@ Slider.prototype.adjustSliderHandlePosition = function(range_str, archiveDate) {
       */
       if (this.currentFocusTime < firstDate) {
         this.changeTimeDisplay(archiveDate[0].datetime_archive);
+
+        dataFetcher.getSensorDataArchive(graphDrawer.sensor_type.id,
+          archiveDate[0].id, function(data) {
+            graphDrawer.setNodes(data.nodes, data.nodes_length);
+            graphDrawer.updateGraphDisplayForSensorData();
+          });
+
         /* move the handler to the leftmost */
         $('.slider-range').slider('option', 'value', 1);
       }
@@ -173,18 +192,6 @@ Slider.prototype.adjustSliderHandlePosition = function(range_str, archiveDate) {
   }
 
   this.current_range = new_range;
-}
-
-Slider.prototype.adjustSliderRange = function(archiveDate, newArchive) {
-  /* replace the stored archiveDate with the new archiveDate corresponding
-    to the new range.
-  */
-  this.archiveDate = newArchive;
-
-  /* update the maximum range of the slider to match the length of the
-    archiveDate array
-  */
-  $('.slider-range').slider('option', 'max', archiveDate.length);
 }
 
 /**

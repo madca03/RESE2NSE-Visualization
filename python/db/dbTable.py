@@ -67,20 +67,15 @@ class linksPresentTable(table):
         return created_at
 
     def update(self):
-        floor_count = self.data_count('floors')
         link_count = self.data_count('links_present')
         node_count = self.data_count('nodes')
         traffic_count = self.data_count('traffic')
-
-        node_count_per_floor = int(node_count / floor_count)
-        link_count_per_floor = int(link_count / floor_count)
-
         creation_date = self.link_present_creation_date()
 
         self.remove_data()
 
-        linkPresentSeeder(self.db_client, link_count_per_floor,
-            node_count_per_floor, floor_count, traffic_count,
+        linkPresentSeeder(self.db_client, link_count,
+            node_count, traffic_count,
             creation_date).seed()
 
 class nodesPresentTable(table):

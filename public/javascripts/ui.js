@@ -14,6 +14,7 @@ UI.prototype.init = function() {
   this.setFloorImageDimensions();
   this.setScrollToLink();
   this.setNavbars();
+  $('span[data-graph-type="network"]').attr('id', 'graph-type-selected');
 }
 
 UI.prototype.removeOldTooltips = function() {

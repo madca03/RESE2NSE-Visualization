@@ -10,7 +10,6 @@ def handler(signum, frame):
     print("Exiting...")
     sys.exit(0)
 
-
 signal.signal(signal.SIGINT, handler)
 
 db_config = {

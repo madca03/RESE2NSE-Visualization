@@ -1,6 +1,6 @@
 'use strict';
 module.exports = function(sequelize, DataTypes) {
-  var Edge = sequelize.define('Edge', {
+  var links_present = sequelize.define('links_present', {
     id: {
       allowNull: false,
       primaryKey: true,
@@ -34,5 +34,5 @@ module.exports = function(sequelize, DataTypes) {
       }
     }
   });
-  return Edge;
+  return links_present;
 };

@@ -25,13 +25,15 @@ router.get('/', function(req, res, next) {
 });
 
 router.get('/graph', function(req, res, next) {
-  var query = "SELECT COUNT(*) AS floor_count FROM floors";
+  var query = 'SELECT id, type FROM sensor_type;';
 
-  models.sequelize.query(query, {type: models.sequelize.QueryTypes.SELECT })
-    .then(function(count) {
-      var floorCount = count[0]["floor_count"];
+  models.sequelize.query(query, {type: models.sequelize.QueryTypes.SELECT})
+    .then(function(sensor) {
+      res.render('graph', {
+        title: 'Graph',
+        sensor: sensor
+      });
 
-      res.render('graph', {floorCount: floorCount, title: 'Graph'})
     });
 });
 

@@ -1,6 +1,6 @@
 'use strict';
 module.exports = function(sequelize, DataTypes) {
-  var Datetime_archive = sequelize.define('Datetime_archive', {
+  var Datetime_archive = sequelize.define('datetime_archive', {
     id: {
       allowNull: false,
       autoIncrement: true,

@@ -16,14 +16,11 @@
           <div class="nav-side">
             <div class="floor-links">
               <ul>
-                <li><span class="nav-side-heading">EEE FLOOR PLAN</span><li>
-
-                <% for (var i = 0; i < floorCount; i++) { %>
-                  <% var floorNumber = i + 1 %>
-
-                  <li><span class="floor-link" data-floor-number=<%= floorNumber %>>Floor <%= floorNumber %></span></li>
+                <li><span class="nav-side-heading">GRAPH TYPE</span></li>
+                <li><span class="graph-type" data-graph-type='network'>Network</span></li>
+                <% for (var i = 0; i < sensor.length; i++) { %>
+                  <li><span class="graph-type" data-graph-type='sensor' data-sensor-id=<%= sensor[i].id %>><%= sensor[i].type %></span></li>
                 <% } %>
-
               </ul>
             </div> <!-- end .floor-links -->
           </div> <!-- end .nav-side -->
@@ -37,13 +34,13 @@
               <div class="floor-label">
                 <span>Floors</span>
                 <button type="button" class="success button edit-btn">Edit Graph</button>
-                <select id="info-selector">
+                <!-- <select id="info-selector">
                   <option value="Network" selected>Network</option>
                   <option value="1">Humidity</option>
                   <option value="2">Temperature</option>
                   <option value="3">Light</option>
                   <option value="4">Pressure</option>
-                </select>
+                </select> -->
               </div> <!-- end .floor-label -->
 
               <div class="floor-graph">
@@ -56,7 +53,11 @@
                     <span>Time: </span>
                     <span class="slider-time"></span>
                   </div> <!-- end .slider-label -->
-                  <div class="slider-range"></div>
+                  <!-- <div class="row no-row-padding"> -->
+                  <div>
+                    <div class="column slider-range"></div>
+                    <button type='button' class="success button" id='pres-btn'>Present</button>
+                  </div>
                 </div> <!-- end .slider-container -->
 
                 <div class='range-selector'>

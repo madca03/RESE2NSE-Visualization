@@ -333,8 +333,7 @@ class linkArchiver(archiver):
             "SELECT id, "
             "source_id, "
             "target_id, "
-            "traffic_id, "
-            "floor_id "
+            "traffic_id "
             "FROM links_present "
             "WHERE source_id "
             "IN (SELECT id FROM nodes WHERE coordinate_set = true) "
@@ -355,10 +354,10 @@ class linkArchiver(archiver):
         rows = self.query_links_present()
         links = []
 
-        for (link_id, source_id, target_id, traffic_id, floor_id) in rows:
+        for (link_id, source_id, target_id, traffic_id) in rows:
             insert_statement = (""
                 "INSERT INTO links_archive "
-                "(id, link_id, source_id, target_id, traffic_id, floor_id, "
+                "(id, link_id, source_id, target_id, traffic_id, "
                 "date_created_id) "
                 "VALUES ( "
                 "%(id)s, "
@@ -366,7 +365,6 @@ class linkArchiver(archiver):
                 "%(source_id)s, "
                 "%(target_id)s, "
                 "%(traffic_id)s, "
-                "%(floor_id)s, "
                 "%(date_created_id)s);")
 
             data = {
@@ -375,7 +373,6 @@ class linkArchiver(archiver):
                 'source_id': source_id,
                 'target_id': target_id,
                 'traffic_id': traffic_id,
-                'floor_id': floor_id,
                 'date_created_id': date_created_id,
             }
 

@@ -37,6 +37,7 @@ GraphDrawer.prototype.setSensorData = function(sensor_data) {
   this.sensor_data = sensor_data;
 };
 
+/* this.sensor_type -> object containing type, and id */
 GraphDrawer.prototype.setSensorType = function(sensor_type) {
   this.sensor_type = sensor_type;
 };
@@ -75,17 +76,6 @@ GraphDrawer.prototype.createArrowHead = function() {
       .append("path")
         .attr("d", "M0,-5L10,0L0,5");
   }
-}
-
-GraphDrawer.prototype.drawGraphDisplay = function() {
-  // initial graph display
-  this.createArrowHead();
-  this.getLinkSelection();
-  this.getNodeSelection();
-
-  // // this.scaleNodePosition();
-  this.createSVGLinks();
-  this.createSVGNodes();
 }
 
 GraphDrawer.prototype.scaleNodePosition = function() {
@@ -165,7 +155,7 @@ GraphDrawer.prototype.initForceLayout = function() {
   * svg g.node elements.
   */
 GraphDrawer.prototype.getNodeSelection = function() {
-  this.nodeSelection = this.svgStage.select("g.nodes-group")
+  this.nodeSelection = d3.select("g.nodes-group")
     .selectAll("g.node")
     .data(this.nodes);
 }
@@ -178,34 +168,7 @@ GraphDrawer.prototype.createSVGNodesForEdit = function() {
   this.createNodeLabel();
 }
 
-// add a svg:circle element inside a node group
-GraphDrawer.prototype.createNodeCircle = function() {
-  var graphForEdit = this.forEdit;
-  var nodeCircle = this.nodeSelection.append("circle")
-    .attr("class", "circle")
-    .attr("cx", function(d) {
-      if (graphForEdit) {
-        return "0px";
-      } else {
-        return d.scaledX;
-      }
-    })
-    .attr("cy", function(d) {
-      if (graphForEdit) {
-        return "0px";
-      } else {
-        return d.scaledY;
-      }
-    })
-    .attr("r", NODERADIUS);
 
-  this.setStylesToCircle(nodeCircle);
-  this.setNodeColor(nodeCircle);
-
-  if (!this.forEdit) {
-    this.addClickEventToCircle(nodeCircle);
-  }
-}
 
 GraphDrawer.prototype.setNodeColor = function(nodeCircle) {
   if (this.graph_type === "Network") {
@@ -215,25 +178,132 @@ GraphDrawer.prototype.setNodeColor = function(nodeCircle) {
   }
 };
 
-GraphDrawer.prototype.updateGraphDisplay = function() {
-  // This block is for normal graph update
-  this.getSVGStage();
-  this.removeSVGLinks();
-  // this.removeSVGNodes();
-  this.updateNodeCircleDataProperty();
+GraphDrawer.prototype.enterNodeSelection = function() {
+  /*** Enter selection ***/
+  var ngroup = this.nodeSelection.enter()
+    .append("g")
+    .attr("class", "node");
 
+  // add circle
+  var nodeCircle = ngroup.append('circle')
+    .attr("class", "circle")
+    .attr("cx", function(d) {
+      if (this.forEdit) {
+        return "0px";
+      } else {
+        return d.scaledX;
+      }
+    })
+    .attr("cy", function(d) {
+      if (this.forEdit) {
+        return "0px";
+      } else {
+        return d.scaledY;
+      }
+    })
+    .attr("r", NODERADIUS)
+
+    this.setStylesToCircle(nodeCircle);
+    this.setNodeColor(nodeCircle);
+
+    if (!this.forEdit) {
+      this.addClickEventToCircle(nodeCircle);
+    }
+
+  // add text
+  ngroup.append("text")
+    .attr("class", "nodetext")
+    .attr("x", function(d) { return d.scaledX; })
+    .attr("y", function(d) { return d.scaledY; })
+    .attr("dx", 12)
+    .attr("dy", ".35em")
+    .text(function(d) { return d.label; });
+}
+
+GraphDrawer.prototype.updateNodeSelection = function() {
+  /*** Update Selection ***/
+  nodeCircle = this.nodeSelection.select('circle')
+    .attr("cx", function(d) {
+      if (this.forEdit) {
+        return "0px";
+      } else {
+        return d.scaledX;
+      }
+    })
+    .attr("cy", function(d) {
+      if (this.forEdit) {
+        return "0px";
+      } else {
+        return d.scaledY;
+      }
+    })
+    .attr("r", NODERADIUS)
+
+    this.setStylesToCircle(nodeCircle);
+    this.setNodeColor(nodeCircle);
+
+    if (!this.forEdit) {
+      this.addClickEventToCircle(nodeCircle);
+    }
+
+  // updatenodelabel
+  this.nodeSelection.select("text")
+    .attr("class", "nodetext")
+    .attr("x", function(d) { return d.scaledX; })
+    .attr("y", function(d) { return d.scaledY; })
+    .attr("dx", 12)
+    .attr("dy", ".35em")
+    .text(function(d) { return d.label; });
+
+  if (!this.sensorDataDisplayed) {
+    this.sensorDataDisplayed = true;
+    this.graphDisplayed = false;
+  }
+
+  this.updateNodeCircleDataProperty();
+}
+
+GraphDrawer.prototype.enterLinkSelection = function() {
+  this.linkSelection.enter().append("path")
+    .attr("class", "link")
+    .attr("marker-end", "url(#end)"); // add the marker
+}
+
+GraphDrawer.prototype.updateLinkSelection = function() {
+  this.computeLinkCurvature();
+  this.setStylesToLinks();
+}
+
+GraphDrawer.prototype.drawGraphDisplay = function() {
+  this.createArrowHead();
   this.getNodeSelection();
   this.getLinkSelection();
+  this.enterNodeSelection();
+  this.enterLinkSelection();
+  this.updateLinkSelection();
+  this.updateNodeSelection();
 
-  // this.scaleNodePosition();
-  this.createSVGLinks();
-  // this.createSVGNodes();
+  if (this.graph_type === 'Network' && !this.graphDisplayed) {
+    this.createTooltip()
+    this.graphDisplayed = true;
+  }
 
-  // // if (this.updateJustEnabled) {
-  //   this.removeSVGNodes();
-  //   this.getNodeSelection();
-  //   this.createSVGNodes();
-  // // }
+
+  /*** Exit Node Selection ***/
+  this.nodeSelection.exit().remove();
+  this.linkSelection.exit().remove();
+}
+
+GraphDrawer.prototype.updateGraphDisplayForSensorData = function() {
+
+  if (this.links.length) {
+    this.links = [];
+    this.removeSVGLinks();
+  }
+
+  this.getNodeSelection();
+  this.updateNodeSelection();
+  this.nodeSelection.exit().remove();
 }
 
 GraphDrawer.prototype.updateNodeCircleDataProperty = function() {
@@ -253,23 +323,7 @@ GraphDrawer.prototype.updateNodeCircleDataProperty = function() {
     data.last_transmission = node.last_transmission;
     data.packets_sent = node.packets_sent;
     data.packets_received = node.packets_received;
-
-    $(this).prop('__data__', data);
   });
-}
-
-GraphDrawer.prototype.updateArchiveGraphDisplay = function() {
-  // This block is for updating the graph display for archive graph dataset
-  this.getSVGStage();
-  this.removeSVGLinks();
-  this.removeSVGNodes();
-
-  this.getNodeSelection();
-  this.getLinkSelection();
-
-  // this.scaleNodePosition();
-  this.createSVGLinks();
-  this.createSVGNodes();
 }
 
 GraphDrawer.prototype.drawGraphDisplayForSensorData = function() {
@@ -278,17 +332,6 @@ GraphDrawer.prototype.drawGraphDisplayForSensorData = function() {
   this.removeSVGNodes();
   this.getNodeSelection();
   this.createSVGNodes();
-}
-
-GraphDrawer.prototype.updateGraphDisplayForSensorData = function() {
-  this.getSVGStage();
-  this.removeSVGNodes();
-  this.getNodeSelection();
-  this.createSVGNodes();
-}
-
-GraphDrawer.prototype.removeSVGLinks = function() {
-  $(".graph-container svg g.links-group").empty();
 }
 
 GraphDrawer.prototype.removeSVGNodes = function() {
@@ -387,7 +430,7 @@ GraphDrawer.prototype.getSVGStage = function() {
 }
 
 GraphDrawer.prototype.getLinkSelection = function() {
-  this.linkSelection = this.svgStage.select("g.links-group")
+  this.linkSelection = d3.select("g.links-group")
     .selectAll("path.link")
     .data(this.links);
 }
@@ -415,8 +458,8 @@ GraphDrawer.prototype.createSVGLinks = function() {
   this.setStylesToLinks();
 }
 
-GraphDrawer.prototype.removeOldSVGLinks = function() {
-  this.linkSelection = this.svgStage.select("g.links-group")
+GraphDrawer.prototype.removeSVGLinks = function() {
+  this.linkSelection = d3.select("g.links-group")
     .selectAll("path.link").data([]);
   this.linkSelection.exit().remove();
 }
@@ -571,6 +614,35 @@ GraphDrawer.prototype.createSVGNodes = function() {
   this.createTooltip();
 }
 
+// add a svg:circle element inside a node group
+GraphDrawer.prototype.createNodeCircle = function() {
+  var graphForEdit = this.forEdit;
+  var nodeCircle = this.nodeSelection.append("circle")
+    .attr("class", "circle")
+    .attr("cx", function(d) {
+      if (graphForEdit) {
+        return "0px";
+      } else {
+        return d.scaledX;
+      }
+    })
+    .attr("cy", function(d) {
+      if (graphForEdit) {
+        return "0px";
+      } else {
+        return d.scaledY;
+      }
+    })
+    .attr("r", NODERADIUS);
+
+  this.setStylesToCircle(nodeCircle);
+  this.setNodeColor(nodeCircle);
+
+  if (!this.forEdit) {
+    this.addClickEventToCircle(nodeCircle);
+  }
+}
+
 GraphDrawer.prototype.addClickEventToCircle = function(nodeCircle) {
   var thisObj = this;
 
@@ -615,49 +687,79 @@ GraphDrawer.prototype.setStylesToCircle = function(nodeCircle) {
 }
 
 GraphDrawer.prototype.setNodeColorForSensorData = function(nodeCircle) {
-  var sensor_type = this.sensor_type;
   var colorLight = null;
   var colorDark = null;
 
-  switch (sensor_type) {
-    case '1': // Humidity
+  switch (this.sensor_type.type) {
+    case 'Humidity':
       colorLight = "#d5f5ff";
       colorDark = "#020f9e";
       break;
-    case '2': // Temperature
+    case 'Temperature':
       colorLight = "#ffd1cc";
       colorDark = "#b50006";
       break;
-    case '3': // Light
+    case 'Light':
       colorLight = "#edd1f5";
       colorDark = "#710173";
       break;
-    case '4': // Pressure
+    case 'Pressure':
       colorLight = "#f7f3d2";
       colorDark = "#dbcc00";
       break;
   }
 
-  var color = d3.scale.linear().domain([1, this.nodes_length])
+  var colorLength = null;
+  var defaultLength = false;
+  if (!this.sensor_type.min || !this.sensor_type.max || !this.sensor_type.step) {
+    colorLength = this.nodes_length;
+    defaultLength = true;
+  } else {
+    colorLength = Math.ceil((this.sensor_type.max - this.sensor_type.min) / this.sensor_type.step);
+  }
+
+  var color = d3.scale.linear().domain([1, colorLength])
     .interpolate(d3.interpolateHcl)
     .range([d3.rgb(colorLight), d3.rgb(colorDark)]);
 
-  var i = 0;
+  var sensor_type_obj = this.sensor_type;
+
+  var getColorIndex = function(sensor_value) {
+    for (var i = 0; i < colorLength; i++) {
+      if ( (sensor_value >= sensor_type_obj.min + (sensor_type_obj.step * i)) &&
+           (sensor_value < sensor_type_obj.min + (sensor_type_obj.step * (i + 1))) ) {
+        return i;
+      }
+    }
+    return i;
+  };
+
+  // console.log('\n');
+  // for (var i = 0; i < colorLength; i++) {
+  //   console.log('i = ' + i + ' ' + color(i) + ' ' + (sensor_type_obj.min + sensor_type_obj.step * i) + '->' + (sensor_type_obj.min + sensor_type_obj.step * (i + 1)) );
+  // }
+
   /* iterate over all SVG node circles */
-  nodeCircle.each(function(d) {
-    var circle = d3.select(this);
 
-    circle.attr("fill", function(d) {
-      return color(i);
+  if (defaultLength) {
+    var i = 0;
+    nodeCircle.each(function(d) {
+      var circle = d3.select(this);
+      circle.attr("fill", function(d) {
+        return color(i);
+      });
+      i++;
     });
+  } else {
+    nodeCircle.each(function(d) {
+      var circle = d3.select(this);
+      var sensor_value = circle.datum().value;
 
-    i++;
-  });
-  // nodeCircle.attr("fill", function(d) {
-  //   // return color(i);
-  //   i++;
-  //   console.log(i);
-  // });
+      circle.attr("fill", function(d) {
+        return color(getColorIndex(sensor_value));
+      });
+    });
+  }
 }
 
 GraphDrawer.prototype.setNodeColorForNetwork = function(nodeCircle) {

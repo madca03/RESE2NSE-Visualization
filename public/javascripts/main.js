@@ -9,12 +9,13 @@ const NODEFILL = "black";
 // link visual properties
 const LINKSTROKEOPACITY = '1';
 const LINKSTROKEWIDTH = '2px';
-const UPDATERATE = 2000;
-const UPDATERATE2 = 500;
+const UPDATERATE = 1000;
+const UPDATERATE2 = 2000;
 
 /*************  Application starts here  *************/
 
 var dummy;
+var dummy2;
 
 // http://stackoverflow.com/questions/544993/official-way-to-ask-jquery-wait-for-all-images-to-load-before-executing-somethin
 /* wait for all images to load */
@@ -27,7 +28,7 @@ $(window).on("load", function() {
   var graphDrawer = new GraphDrawer();
 
   ui.init();
-  slider.init(dataFetcher, graph, graphDrawer);
+  slider.init(dataFetcher, graph, graphDrawer, displayGraphOption);
   graphDrawer.setDimensions(ui.svgWidth, ui.svgHeight);
   graphDrawer.initSVGStage();
 
@@ -62,25 +63,56 @@ $(window).on("load", function() {
   //   }, UPDATERATE);
   // }
 
-  $('#info-selector').change(function() {
-    clearInterval(display_timer);
-    var sensor_type = $(this).val();
-    graphDrawer.graphDisplayed = false;
+  // $('#info-selector').change(function() {
+  $('.graph-type').on('click', function() {
+    var graph_type = $(this).data();
+    var graph_type_name = graph_type.graphType.toLowerCase();
+    var sensor_type_id = $(this).data().sensorId;
 
-    if ($(this).val() !== "Network") {
-      displayGraphForSensorData(sensor_type);
-      display_timer = setInterval(function() {
-        if (!dataFetcher.updateDisabled) {
-          displayGraphForSensorData(sensor_type);
-        }
-      }, UPDATERATE2);
+    $('span#graph-type-selected').removeAttr('id');
+    if (graph_type_name !== "network") {
+      $('span[data-graph-type="' + graph_type_name + '"][data-sensor-id="' + sensor_type_id + '"]').attr('id','graph-type-selected');
     } else {
-      displayGraph();
-      display_timer = setInterval(function() {
-        if (!dataFetcher.updateDisabled) {
-          displayGraph();
-        }
-      }, UPDATERATE);
+      $('span[data-graph-type="' + graph_type_name + '"]').attr('id','graph-type-selected');
+    }
+
+
+    clearInterval(display_timer);
+    // graphDrawer.graphDisplayed = false;
+
+    if (slider.inArchive) {
+      if (graph_type_name === "network") {
+        dataFetcher.getArchiveDataForDisplay(
+          slider.archiveId, function(data) {
+            graphDrawer.setGraphType("Network");
+            graphDrawer.setGraph(data);
+            graphDrawer.drawGraphDisplay();
+          });
+      } else if (graph_type_name === "sensor") {
+        dataFetcher.getSensorDataArchive(sensor_type_id,
+          slider.archiveId, function(data) {
+            graphDrawer.setGraphType("Sensor");
+            graphDrawer.setNodes(data.nodes, data.nodes_length);
+            graphDrawer.setSensorType(data.sensor)
+            graphDrawer.updateGraphDisplayForSensorData();
+          });
+      }
+    } else {
+      if (graph_type_name !== "network") {
+        displayGraphForSensorData(sensor_type_id);
+        display_timer = setInterval(function() {
+          if (!dataFetcher.updateDisabled) {
+            displayGraphForSensorData(sensor_type_id);
+          }
+        }, UPDATERATE2);
+      } else {
+        displayGraph();
+        display_timer = setInterval(function() {
+          if (!dataFetcher.updateDisabled) {
+            displayGraph();
+          }
+        }, UPDATERATE);
+      }
     }
   });
 
@@ -105,7 +137,7 @@ $(window).on("load", function() {
 
       request.done(function(_data, textStatus, jqXHR) {
         graph.archiveDate = _data.data;
-        slider.adjustSliderHandlePosition($(this).val(), graph.archiveDate);
+        slider.adjustSliderHandlePosition($(this).val(), graph.archiveDate, dataFetcher, graphDrawer);
       });
     }
   });
@@ -128,18 +160,37 @@ $(window).on("load", function() {
     });
   });
 
+  $('#pres-btn').on('click', function() {
+    var max = $('.slider-range').slider('option','max');
+    $('.slider-range').slider('option', 'value', max);
+    slider.inArchive = false;
+    dataFetcher.updateDisabled = false;
+  });
+
+  function displayGraphOption() {
+    if (graphDrawer.graph_type !== "Network") {
+      displayGraphForSensorData(graphDrawer.sensor_type.id);
+      display_timer = setInterval(function() {
+        if (!dataFetcher.updateDisabled) {
+          displayGraphForSensorData(graphDrawer.sensor_type.id);
+        }
+      }, UPDATERATE2);
+    } else {
+      displayGraph();
+      display_timer = setInterval(function() {
+        if (!dataFetcher.updateDisabled) {
+          displayGraph();
+        }
+      }, UPDATERATE);
+    }
+  }
+
   function displayGraphForSensorData(sensor_type) {
     dataFetcher.getSensorData(graph.archiveDate, sensor_type, function(data) {
       graphDrawer.setGraphType("Sensor");
       graphDrawer.setNodes(data.nodes, data.nodes_length);
-      graphDrawer.setSensorType(sensor_type);
-
-      if (graphDrawer.graphDisplayed) {
-        graphDrawer.updateGraphDisplayForSensorData();
-      } else {
-        graphDrawer.drawGraphDisplayForSensorData();
-        graphDrawer.graphDisplayed = true;
-      }
+      graphDrawer.setSensorType(data.sensor_type);
+      graphDrawer.updateGraphDisplayForSensorData();
 
       slider.storeArchiveDate(graph.archiveDate, data.date_archive);
       slider.updateSliderRange(graph.archiveDate.length);
@@ -151,17 +202,8 @@ $(window).on("load", function() {
     dataFetcher.getDataForDisplay(graph.archiveDate, function(data) {
       graphDrawer.setGraphType("Network");
       graphDrawer.setGraph(data.graph);
+      graphDrawer.drawGraphDisplay();
 
-      /* if graph display if just for update */
-      if (graphDrawer.graphDisplayed) {
-        graphDrawer.updateGraphDisplay();
-        ui.removeOldTooltips();
-      }
-      /* if it's the first time to display the graph */
-      else {
-        graphDrawer.drawGraphDisplay();
-        graphDrawer.graphDisplayed = true;
-      }
 
       /* update the maximum value of the slider to the total archive count
         add the old archiveDate length to the number of new archiveDate

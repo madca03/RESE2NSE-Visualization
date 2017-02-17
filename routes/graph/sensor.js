@@ -6,7 +6,6 @@ module.exports = function(req, res, next) {
       + 'nodes.id, '
       + 'nodes.label, '
       + 'nodes.mac_address, '
-      + 'nodes.floor_id, '
       + 'nodes_present.x_coordinate, '
       + 'nodes_present.y_coordinate, '
       + 'nodes_present.last_transmission, '
@@ -24,6 +23,9 @@ module.exports = function(req, res, next) {
     + 'ORDER BY sensor_data.value ASC'
     + ';';
 
+    var sensor_query = 'SELECT * from sensor_type '
+      + 'WHERE id = ' + req.params.sensor_type_id + ';';
+
     var archive_date_query = 'SELECT id, datetime_archive '
       + 'FROM datetime_archive '
       + 'WHERE id >= ' + req.params.archive_date_index + ';';
@@ -32,17 +34,21 @@ module.exports = function(req, res, next) {
     .then(function(nodes) {
       models.sequelize.query(archive_date_query, { type: models.sequelize.QueryTypes.SELECT })
         .then(function(date_archive) {
-          var response = {
-            'status': 'ok',
-            'data': {
-              'nodes': nodes,
-              'nodes_length': nodes.length,
-              'date_archive': date_archive,
-              'date_archive_count': date_archive.length
-            }
-          };
+          models.sequelize.query(sensor_query, {type: models.sequelize.QueryTypes.SELECT})
+            .then(function(sensor_type) {
+              var response = {
+                'status': 'ok',
+                'data': {
+                  'nodes': nodes,
+                  'nodes_length': nodes.length,
+                  'date_archive': date_archive,
+                  'date_archive_count': date_archive.length,
+                  'sensor_type': sensor_type[0]
+                }
+              };
 
-          res.json(response);
+              res.json(response);
+            });
         });
     });
 };

@@ -10,6 +10,15 @@ module.exports = {
       },
       type: {
         type: Sequelize.STRING
+      },
+      min: {
+        type: Sequelize.INTEGER
+      },
+      max: {
+        type: Sequelize.INTEGER
+      },
+      step: {
+        type: Sequelize.INTEGER
       }
     });
   },

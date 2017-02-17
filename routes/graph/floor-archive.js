@@ -6,7 +6,6 @@ module.exports = function(req, res, next) {
         + 'nodes.id, '
         + 'nodes.label, '
         + 'nodes.mac_address, '
-        + 'nodes.floor_id, '
         + 'nodes_archive.x_coordinate, '
         + 'nodes_archive.y_coordinate, '
         + 'nodes_archive.last_transmission, '
@@ -19,7 +18,6 @@ module.exports = function(req, res, next) {
       + 'INNER JOIN sensors '
         + 'ON (nodes.sensor_id = sensors.id) '
       + 'WHERE nodes_archive.coordinate_set = true '
-      + 'AND nodes.floor_id = ' + req.params.floor_number + ' '
       + 'AND nodes_archive.date_created_id = ' + req.params.date_created_id + ';';
 
     var link_query = ''
@@ -27,7 +25,6 @@ module.exports = function(req, res, next) {
         + 'links_archive.id, '
         + 'links_archive.source_id, '
         + 'links_archive.target_id, '
-        + 'links_archive.floor_id, '
         + 'traffic.status '
       + 'FROM links_archive '
       + 'INNER JOIN traffic '

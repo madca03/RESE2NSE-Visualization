@@ -32,9 +32,14 @@ class sensorDataSeeder:
                     'id': data_count,
                     'node_id': i + 1,
                     'sensor_type_id': j + 1,
-                    'value': random.uniform(1,1000),
+                    # 'value': random.uniform(1,1000),
                     'created_at': self.created_at
                 }
+
+                if (data['sensor_type_id']==2):
+                    data['value'] = random.uniform(20,60)
+                else:
+                    data['value'] = random.uniform(1,100)
 
                 data_count += 1
 
@@ -45,3 +50,38 @@ class sensorDataSeeder:
                     exit(1)
 
         self.db_client.commit()
+
+
+# def get_needed_table_data(db_client):
+#     query = 'select distinct(created_at) from nodes_present limit 1;'
+#     cursor = db_client.cursor
+#     cursor.execute(query)
+#     (created_at,) = cursor.fetchone()
+#
+#     query = 'select count(*) from nodes_present;'
+#     cursor.execute(query)
+#     (node_count,) = cursor.fetchone()
+#
+#     query = 'select count(*) from sensor_type;'
+#     cursor.execute(query)
+#     (sensor_count,) = cursor.fetchone()
+#     return created_at, node_count, sensor_count
+#
+# if __name__ == "__main__":
+#     import sys
+#     sys.path.insert(0, '../db')
+#
+#     from dbClient import dbClient
+#     db_config = {
+#         'user': 'rese2nse',
+#         'password': 'rese2nse',
+#         'host': '127.0.0.1'
+#     }
+#
+#     db_client = dbClient(db_config)
+#     db_client.start_connection()
+#     db_client.use_database('graph')
+#     db_client.remove_table_data('sensor_data')
+#
+#     created_at, node_count, sensor_count = get_needed_table_data(db_client)
+#     sensorDataSeeder(db_client, node_count, sensor_count, created_at).seed()

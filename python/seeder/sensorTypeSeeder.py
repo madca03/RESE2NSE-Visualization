@@ -10,13 +10,26 @@ class sensorTypeSeeder:
         for index, sensor in enumerate(self._sensors):
             insert_statement = (""
                 "INSERT INTO sensor_type "
-                "(id, type) "
-                "VALUES (%(id)s, %(type)s);")
+                "(id, "
+                "type, "
+                "min, "
+                "max, "
+                "step) "
+                "VALUES ("
+                "%(id)s, "
+                "%(type)s, "
+                "%(min)s, "
+                "%(max)s, "
+                "%(step)s "
+                ");")
 
             data = {
                 'id': index + 1,
-                'type': sensor
-            }
+                'type': sensor,
+                'min': None,
+                'max': None,
+                'step': None
+            };
 
             try:
                 self.cursor.execute(insert_statement, data)

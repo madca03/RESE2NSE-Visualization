@@ -1,6 +1,6 @@
 'use strict';
 module.exports = function(sequelize, DataTypes) {
-  var Edge_archive = sequelize.define('Edge_archive', {
+  var Link_archive = sequelize.define('links_archive', {
     id: {
       allowNull: false,
       primaryKey: true,
@@ -38,5 +38,5 @@ module.exports = function(sequelize, DataTypes) {
       }
     }
   });
-  return Edge_archive;
+  return Link_archive;
 };
